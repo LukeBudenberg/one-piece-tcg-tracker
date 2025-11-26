@@ -1567,16 +1567,48 @@ function saveBackgroundCards() {
 }
 
 // Start background carousel
-function startBackgroundCarousel() {
-    if (backgroundCards.length === 0) return;
-    
-    let currentIndex = 0;
+async function startBackgroundCarousel() {
     const carousel = document.getElementById('backgroundCarousel');
     
-    // Set initial background
-    carousel.style.backgroundImage = `url('${backgroundCards[0]}')`;
+    // If no background cards selected, use all leader cards
+    let cardsToUse = backgroundCards;
+    if (backgroundCards.length === 0) {
+        // Fetch all leader cards
+        try {
+            const [setResponse, stResponse, promoResponse] = await Promise.all([
+                fetch(API_URL),
+                fetch(ST_API_URL),
+                fetch(PROMO_API_URL)
+            ]);
+            
+            const setData = await setResponse.json();
+            const stData = await stResponse.json();
+            const promoData = await promoResponse.json();
+            
+            const allCards = [...setData, ...stData, ...promoData];
+            const leaderCards = allCards.filter(card => card.card_type === 'Leader');
+            
+            // Get all leader card images
+            cardsToUse = leaderCards.map(card => card.card_image);
+            
+            // Shuffle the array for random order
+            cardsToUse = cardsToUse.sort(() => Math.random() - 0.5);
+            
+            console.log(`Using ${cardsToUse.length} random leader cards as background`);
+        } catch (error) {
+            console.error('Error loading leader cards for background:', error);
+            return;
+        }
+    }
     
-    if (backgroundCards.length === 1) return; // No need to cycle with only one image
+    if (cardsToUse.length === 0) return;
+    
+    let currentIndex = 0;
+    
+    // Set initial background
+    carousel.style.backgroundImage = `url('${cardsToUse[0]}')`;
+    
+    if (cardsToUse.length === 1) return; // No need to cycle with only one image
     
     // Clear any existing interval
     if (backgroundCarouselInterval) {
@@ -1585,14 +1617,14 @@ function startBackgroundCarousel() {
     
     // Cycle through backgrounds every 10 seconds
     backgroundCarouselInterval = setInterval(() => {
-        currentIndex = (currentIndex + 1) % backgroundCards.length;
+        currentIndex = (currentIndex + 1) % cardsToUse.length;
         
         // Fade out
         carousel.style.opacity = '0';
         
         // Change image after fade out
         setTimeout(() => {
-            carousel.style.backgroundImage = `url('${backgroundCards[currentIndex]}')`;
+            carousel.style.backgroundImage = `url('${cardsToUse[currentIndex]}')`;
             carousel.style.opacity = '1';
         }, 750); // Half of transition time
         
