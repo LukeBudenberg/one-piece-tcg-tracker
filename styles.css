@@ -205,6 +205,49 @@ header h1 {
     }
 }
 
+/* Leader Images Display */
+.leader-images-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    min-height: 0;
+    transition: all 0.3s ease;
+}
+
+.leader-images-display:empty {
+    display: none;
+}
+
+.leader-image-card {
+    position: relative;
+    width: 150px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.leader-image-card:hover {
+    transform: scale(1.05);
+}
+
+.leader-image-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.leader-image-label {
+    text-align: center;
+    font-size: 0.75rem;
+    margin-top: 4px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
 .stats-overview {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

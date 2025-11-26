@@ -257,6 +257,9 @@ function attachEventListeners() {
         const index = parseInt(this.value);
         if (!isNaN(index) && allLeaders[index]) {
             selectedMyLeader = allLeaders[index];
+            displayLeaderImages('myLeaderImages', allLeaders[index].name);
+        } else {
+            clearLeaderImages('myLeaderImages');
         }
         updateSubmitButton();
     });
@@ -265,6 +268,9 @@ function attachEventListeners() {
         const index = parseInt(this.value);
         if (!isNaN(index) && allLeaders[index]) {
             selectedOpponentLeader = allLeaders[index];
+            displayLeaderImages('opponentLeaderImages', allLeaders[index].name);
+        } else {
+            clearLeaderImages('opponentLeaderImages');
         }
         updateSubmitButton();
     });
@@ -2052,6 +2058,9 @@ function selectTournamentMyLeader() {
     const index = parseInt(select.value);
     if (!isNaN(index)) {
         tournamentSelectedMyLeader = allLeaders[index];
+        displayLeaderImages('tournamentMyLeaderImages', allLeaders[index].name);
+    } else {
+        clearLeaderImages('tournamentMyLeaderImages');
     }
 }
 
@@ -2061,6 +2070,9 @@ function selectTournamentOpponentLeader() {
     const index = parseInt(select.value);
     if (!isNaN(index)) {
         tournamentSelectedOpponentLeader = allLeaders[index];
+        displayLeaderImages('tournamentOpponentLeaderImages', allLeaders[index].name);
+    } else {
+        clearLeaderImages('tournamentOpponentLeaderImages');
     }
 }
 
@@ -2541,6 +2553,9 @@ function editTournamentSelectMyLeader() {
     const index = parseInt(select.value);
     if (!isNaN(index)) {
         editTournamentSelectedMyLeader = allLeaders[index];
+        displayLeaderImages('editTournamentMyLeaderImages', allLeaders[index].name);
+    } else {
+        clearLeaderImages('editTournamentMyLeaderImages');
     }
 }
 
@@ -2549,6 +2564,9 @@ function editTournamentSelectOpponentLeader() {
     const index = parseInt(select.value);
     if (!isNaN(index)) {
         editTournamentSelectedOpponentLeader = allLeaders[index];
+        displayLeaderImages('editTournamentOpponentLeaderImages', allLeaders[index].name);
+    } else {
+        clearLeaderImages('editTournamentOpponentLeaderImages');
     }
 }
 
@@ -2606,6 +2624,39 @@ function saveEditTournamentMatch() {
     // Refresh the detail view
     openTournamentDetail(editingTournamentId);
     closeEditTournamentMatch();
+}
+
+// Display all versions of a leader's images
+function displayLeaderImages(containerId, leaderName) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    // Find all versions of this leader
+    const leaderVersions = allLeaders.filter(l => l.name === leaderName);
+    
+    leaderVersions.forEach(leader => {
+        const imageCard = document.createElement('div');
+        imageCard.className = 'leader-image-card';
+        
+        // Determine the label (set + card number)
+        let label = `${leader.set}-${leader.cardNumber}`;
+        
+        imageCard.innerHTML = `
+            <img src="${leader.image}" alt="${leader.name}">
+            <div class="leader-image-label">${label}</div>
+        `;
+        
+        container.appendChild(imageCard);
+    });
+}
+
+function clearLeaderImages(containerId) {
+    const container = document.getElementById(containerId);
+    if (container) {
+        container.innerHTML = '';
+    }
 }
 
 // Page Navigation
