@@ -134,7 +134,7 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ## 📧 Contact
 
-Created by [Your Name] - Feel free to reach out!
+Created by Luke Budenberg - Feel free to reach out!
 
 ---
 
