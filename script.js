@@ -2148,32 +2148,48 @@ function updateTournamentsList() {
         const totalRounds = tournament.rounds || total;
         const status = tournament.completed ? '✅ Completed' : `⏳ In Progress (${total}/${totalRounds})`;
         
+        // Get user's leader from first match (if available)
+        let leaderImage = '';
+        let leaderName = '';
+        if (tournamentMatches.length > 0 && tournamentMatches[0].myLeader) {
+            const myLeader = tournamentMatches[0].myLeader;
+            leaderImage = myLeader.image || 'https://via.placeholder.com/80x112?text=No+Image';
+            leaderName = getLeaderDisplayName(myLeader);
+        }
+        
         return `
             <div class="tournament-item" onclick="openTournamentDetail(${tournament.id})">
-                <div class="tournament-header">
-                    <div>
-                        <div class="tournament-name">${tournamentName}</div>
-                        <div class="tournament-date">📅 ${dateStr}${tournament.location ? ` • 📍 ${tournament.location}` : ''}${tournament.format ? ` • ${tournament.format}` : ''}</div>
+                ${leaderImage ? `
+                    <div class="tournament-leader-image">
+                        <img src="${leaderImage}" alt="${leaderName}" title="${leaderName}">
                     </div>
-                    <div class="tournament-placement" style="${tournament.completed ? '' : 'background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);'}">${status}</div>
-                </div>
-                <div class="tournament-stats">
-                    <div class="tournament-stat">
-                        <span class="tournament-stat-label">Record</span>
-                        <span class="tournament-stat-value">${wins}-${losses}</span>
-                    </div>
-                    <div class="tournament-stat">
-                        <span class="tournament-stat-label">Win Rate</span>
-                        <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
-                    </div>
-                    <div class="tournament-stat">
-                        <span class="tournament-stat-label">Rounds</span>
-                        <span class="tournament-stat-value">${total}/${totalRounds}</span>
-                    </div>
-                </div>
-                ${!tournament.completed && tournament.rounds ? `
-                    <button class="add-tournament-btn" onclick="event.stopPropagation(); continueTournament(${tournament.id})" style="margin-top: 15px; padding: 10px;">➕ Continue Tournament</button>
                 ` : ''}
+                <div class="tournament-details">
+                    <div class="tournament-header">
+                        <div>
+                            <div class="tournament-name">${tournamentName}</div>
+                            <div class="tournament-date">📅 ${dateStr}${tournament.location ? ` • 📍 ${tournament.location}` : ''}${tournament.format ? ` • ${tournament.format}` : ''}</div>
+                        </div>
+                        <div class="tournament-placement" style="${tournament.completed ? '' : 'background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);'}">${status}</div>
+                    </div>
+                    <div class="tournament-stats">
+                        <div class="tournament-stat">
+                            <span class="tournament-stat-label">Record</span>
+                            <span class="tournament-stat-value">${wins}-${losses}</span>
+                        </div>
+                        <div class="tournament-stat">
+                            <span class="tournament-stat-label">Win Rate</span>
+                            <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
+                        </div>
+                        <div class="tournament-stat">
+                            <span class="tournament-stat-label">Rounds</span>
+                            <span class="tournament-stat-value">${total}/${totalRounds}</span>
+                        </div>
+                    </div>
+                    ${!tournament.completed && tournament.rounds ? `
+                        <button class="add-tournament-btn" onclick="event.stopPropagation(); continueTournament(${tournament.id})" style="margin-top: 15px; padding: 10px;">➕ Continue Tournament</button>
+                    ` : ''}
+                </div>
             </div>
         `;
     }).join('');
