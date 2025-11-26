@@ -1317,3 +1317,136 @@ textarea:focus {
     background: white;
     border-radius: 10px;
 }
+
+/* Tournament Styles */
+.add-tournament-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s;
+}
+
+.add-tournament-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.tournaments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.tournament-item {
+    padding: 20px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tournament-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--shadow);
+    border-color: var(--primary);
+}
+
+.tournament-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.tournament-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+}
+
+.tournament-date {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.tournament-placement {
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.tournament-stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background: rgba(0, 122, 255, 0.05);
+    border-radius: 10px;
+}
+
+.tournament-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.tournament-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tournament-stat-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.tournament-detail-modal {
+    max-width: 1000px;
+}
+
+.tournament-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.tournament-info-item {
+    padding: 15px;
+    background: rgba(0, 122, 255, 0.05);
+    border-radius: 10px;
+}
+
+.tournament-info-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.tournament-info-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}

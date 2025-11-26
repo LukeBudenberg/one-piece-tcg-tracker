@@ -146,6 +146,19 @@
         </div>
 
         <div class="card">
+            <div class="card-header collapsible" onclick="toggleSection('tournamentsSection')">
+                <h2>🏆 Tournaments</h2>
+                <span class="collapse-icon" id="tournamentsSectionIcon">▼</span>
+            </div>
+            <div id="tournamentsSection" class="collapsible-content">
+                <button class="add-tournament-btn" onclick="openCreateTournament()">➕ Create Tournament</button>
+                <div id="tournamentsList" class="tournaments-list">
+                    <p class="empty-state">No tournaments recorded yet. Create one to start tracking!</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
             <div class="card-header collapsible" onclick="toggleSection('matchHistorySection')">
                 <h2>Match History</h2>
                 <span class="collapse-icon" id="matchHistorySectionIcon">▼</span>
@@ -597,6 +610,91 @@
             <div class="modal-footer">
                 <button class="modal-btn cancel-btn" onclick="closeNameEditor()">Cancel</button>
                 <button class="modal-btn save-btn" onclick="saveUserName()">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Tournament Modal -->
+    <div id="createTournamentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏆 Create Tournament</h2>
+                <span class="modal-close" onclick="closeCreateTournament()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="createTournamentForm">
+                    <div class="form-group">
+                        <label for="tournamentName">Tournament Name *</label>
+                        <input type="text" id="tournamentName" required placeholder="e.g., Local Store Championship">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="tournamentDate">Date *</label>
+                            <input type="date" id="tournamentDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tournamentFormat">Format</label>
+                            <select id="tournamentFormat">
+                                <option value="">Select format...</option>
+                                <option value="OP-01">OP-01 Block</option>
+                                <option value="OP-02">OP-02 Block</option>
+                                <option value="OP-03">OP-03 Block</option>
+                                <option value="OP-04">OP-04 Block</option>
+                                <option value="OP-05">OP-05 Block</option>
+                                <option value="OP-06">OP-06 Block</option>
+                                <option value="EB-01">EB-01 Block</option>
+                                <option value="OP-07">OP-07 Block</option>
+                                <option value="OP-08">OP-08 Block</option>
+                                <option value="OP-09">OP-09 Block</option>
+                                <option value="OP-10">OP-10 Block</option>
+                                <option value="OP-11">OP-11 Block</option>
+                                <option value="EB-02">EB-02 Block</option>
+                                <option value="OP-12">OP-12 Block</option>
+                                <option value="OP-13">OP-13 Block</option>
+                                <option value="OP-14">OP-14 Block</option>
+                                <option value="EB-03">EB-03 Block</option>
+                                <option value="EB-04">EB-04 Block</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tournamentLocation">Location</label>
+                        <input type="text" id="tournamentLocation" placeholder="e.g., Game Store Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tournamentPlacement">Final Placement</label>
+                        <input type="text" id="tournamentPlacement" placeholder="e.g., 1st, Top 4, Top 8">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tournamentNotes">Notes</label>
+                        <textarea id="tournamentNotes" rows="3" placeholder="Any additional notes about the tournament..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeCreateTournament()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveTournament()">Create Tournament</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tournament Detail Modal -->
+    <div id="tournamentDetailModal" class="modal" style="display: none;">
+        <div class="modal-content tournament-detail-modal">
+            <div class="modal-header">
+                <h2 id="tournamentDetailTitle">🏆 Tournament Details</h2>
+                <span class="modal-close" onclick="closeTournamentDetail()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="tournamentDetailContent"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="deleteTournament()" style="background: var(--danger);">Delete Tournament</button>
+                <button class="modal-btn save-btn" onclick="closeTournamentDetail()">Close</button>
             </div>
         </div>
     </div>

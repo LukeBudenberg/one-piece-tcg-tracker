@@ -137,12 +137,15 @@ let editingMatchId = null; // Track if we're editing an existing match
 let backgroundCards = []; // Store selected background cards
 let backgroundCarouselInterval = null;
 let userName = ''; // Store user's name
+let tournaments = []; // Store tournaments
+let currentTournamentId = null; // Track current tournament being viewed
 
 // Initialize app
 async function init() {
     loadMatches();
     loadBackgroundCards();
     loadUserName();
+    loadTournaments();
     
     // Show loading state
     const myLeaderSelect = document.getElementById('myLeaderName');
@@ -159,6 +162,7 @@ async function init() {
     updateUI();
     startBackgroundCarousel();
     updateTitle();
+    updateTournamentsList();
 }
 
 // Load matches from localStorage
@@ -1846,6 +1850,383 @@ function updateNamePreview() {
     } else {
         preview.textContent = 'One Piece TCG Tracker';
     }
+}
+
+// ==================== TOURNAMENT FUNCTIONS ====================
+
+// Load tournaments from localStorage
+function loadTournaments() {
+    const stored = localStorage.getItem('opTcgTournaments');
+    if (stored) {
+        tournaments = JSON.parse(stored);
+    }
+}
+
+// Save tournaments to localStorage
+function saveTournaments() {
+    localStorage.setItem('opTcgTournaments', JSON.stringify(tournaments));
+}
+
+// Open create tournament modal
+function openCreateTournament() {
+    const modal = document.getElementById('createTournamentModal');
+    document.getElementById('createTournamentForm').reset();
+    // Set today's date as default
+    document.getElementById('tournamentDate').valueAsDate = new Date();
+    modal.style.display = 'block';
+}
+
+// Close create tournament modal
+function closeCreateTournament() {
+    const modal = document.getElementById('createTournamentModal');
+    modal.style.display = 'none';
+}
+
+// Save tournament
+function saveTournament() {
+    const name = document.getElementById('tournamentName').value.trim();
+    const date = document.getElementById('tournamentDate').value;
+    const format = document.getElementById('tournamentFormat').value;
+    const location = document.getElementById('tournamentLocation').value.trim();
+    const placement = document.getElementById('tournamentPlacement').value.trim();
+    const notes = document.getElementById('tournamentNotes').value.trim();
+    
+    if (!name || !date) {
+        alert('Please fill in required fields (Name and Date)');
+        return;
+    }
+    
+    const tournament = {
+        id: Date.now(),
+        name,
+        date,
+        format,
+        location,
+        placement,
+        notes,
+        matchIds: [],
+        createdAt: new Date().toISOString()
+    };
+    
+    tournaments.push(tournament);
+    saveTournaments();
+    updateTournamentsList();
+    closeCreateTournament();
+    
+    // Ask if user wants to add matches now
+    if (confirm('Tournament created! Would you like to add matches to this tournament now?')) {
+        openTournamentDetail(tournament.id);
+    }
+}
+
+// Update tournaments list
+function updateTournamentsList() {
+    const container = document.getElementById('tournamentsList');
+    
+    if (tournaments.length === 0) {
+        container.innerHTML = '<p class="empty-state">No tournaments recorded yet. Create one to start tracking!</p>';
+        return;
+    }
+    
+    // Sort by date (newest first)
+    const sortedTournaments = [...tournaments].sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    container.innerHTML = sortedTournaments.map(tournament => {
+        // Get matches for this tournament
+        const tournamentMatches = matches.filter(m => tournament.matchIds.includes(m.id));
+        const wins = tournamentMatches.filter(m => m.result === 'win').length;
+        const losses = tournamentMatches.filter(m => m.result === 'loss').length;
+        const total = tournamentMatches.length;
+        const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+        const winRateColor = total > 0 ? getWinRateColor(winRate) : '#8E8E93';
+        
+        const dateObj = new Date(tournament.date);
+        const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        return `
+            <div class="tournament-item" onclick="openTournamentDetail(${tournament.id})">
+                <div class="tournament-header">
+                    <div>
+                        <div class="tournament-name">${tournament.name}</div>
+                        <div class="tournament-date">📅 ${dateStr}${tournament.location ? ` • 📍 ${tournament.location}` : ''}${tournament.format ? ` • ${tournament.format}` : ''}</div>
+                    </div>
+                    ${tournament.placement ? `<div class="tournament-placement">${tournament.placement}</div>` : ''}
+                </div>
+                <div class="tournament-stats">
+                    <div class="tournament-stat">
+                        <span class="tournament-stat-label">Record</span>
+                        <span class="tournament-stat-value">${wins}-${losses}</span>
+                    </div>
+                    <div class="tournament-stat">
+                        <span class="tournament-stat-label">Win Rate</span>
+                        <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
+                    </div>
+                    <div class="tournament-stat">
+                        <span class="tournament-stat-label">Matches</span>
+                        <span class="tournament-stat-value">${total}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Open tournament detail modal
+function openTournamentDetail(tournamentId) {
+    const tournament = tournaments.find(t => t.id === tournamentId);
+    if (!tournament) return;
+    
+    currentTournamentId = tournamentId;
+    const modal = document.getElementById('tournamentDetailModal');
+    const title = document.getElementById('tournamentDetailTitle');
+    const content = document.getElementById('tournamentDetailContent');
+    
+    title.textContent = `🏆 ${tournament.name}`;
+    
+    // Get tournament matches
+    const tournamentMatches = matches.filter(m => tournament.matchIds.includes(m.id));
+    const wins = tournamentMatches.filter(m => m.result === 'win').length;
+    const losses = tournamentMatches.filter(m => m.result === 'loss').length;
+    const total = tournamentMatches.length;
+    const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
+    const winRateColor = total > 0 ? getWinRateColor(winRate) : '#8E8E93';
+    
+    // Calculate turn order stats
+    const firstMatches = tournamentMatches.filter(m => m.turnOrder === 'first');
+    const firstWins = firstMatches.filter(m => m.result === 'win').length;
+    const firstWinRate = firstMatches.length > 0 ? ((firstWins / firstMatches.length) * 100).toFixed(1) : 'N/A';
+    const firstColor = getWinRateColor(firstWinRate);
+    
+    const secondMatches = tournamentMatches.filter(m => m.turnOrder === 'second');
+    const secondWins = secondMatches.filter(m => m.result === 'win').length;
+    const secondWinRate = secondMatches.length > 0 ? ((secondWins / secondMatches.length) * 100).toFixed(1) : 'N/A';
+    const secondColor = getWinRateColor(secondWinRate);
+    
+    // Get matchup breakdown
+    const matchupBreakdown = {};
+    tournamentMatches.forEach(match => {
+        const key = getLeaderKey(match.opponentLeader);
+        if (!matchupBreakdown[key]) {
+            matchupBreakdown[key] = {
+                leader: match.opponentLeader,
+                wins: 0,
+                losses: 0,
+                total: 0
+            };
+        }
+        matchupBreakdown[key].total++;
+        if (match.result === 'win') {
+            matchupBreakdown[key].wins++;
+        } else {
+            matchupBreakdown[key].losses++;
+        }
+    });
+    
+    const matchupArray = Object.values(matchupBreakdown).sort((a, b) => b.total - a.total);
+    
+    const dateStr = new Date(tournament.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    
+    content.innerHTML = `
+        <div class="tournament-info-grid">
+            <div class="tournament-info-item">
+                <div class="tournament-info-label">Date</div>
+                <div class="tournament-info-value">${dateStr}</div>
+            </div>
+            ${tournament.format ? `
+                <div class="tournament-info-item">
+                    <div class="tournament-info-label">Format</div>
+                    <div class="tournament-info-value">${tournament.format}</div>
+                </div>
+            ` : ''}
+            ${tournament.location ? `
+                <div class="tournament-info-item">
+                    <div class="tournament-info-label">Location</div>
+                    <div class="tournament-info-value">${tournament.location}</div>
+                </div>
+            ` : ''}
+            ${tournament.placement ? `
+                <div class="tournament-info-item">
+                    <div class="tournament-info-label">Placement</div>
+                    <div class="tournament-info-value">${tournament.placement}</div>
+                </div>
+            ` : ''}
+        </div>
+        
+        <div class="tournament-stats" style="margin-bottom: 30px;">
+            <div class="tournament-stat">
+                <span class="tournament-stat-label">Record</span>
+                <span class="tournament-stat-value">${wins}W - ${losses}L</span>
+            </div>
+            <div class="tournament-stat">
+                <span class="tournament-stat-label">Win Rate</span>
+                <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
+            </div>
+            <div class="tournament-stat">
+                <span class="tournament-stat-label">Total Matches</span>
+                <span class="tournament-stat-value">${total}</span>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 30px;">
+            <h3 style="margin-bottom: 15px;">Turn Order Performance</h3>
+            <div class="turn-order-stats">
+                <span class="turn-stat" style="background-color: ${firstColor}20; color: ${firstColor}; font-weight: 600;">
+                    First: ${firstWinRate}${firstWinRate !== 'N/A' ? '%' : ''} (${firstWins}W-${firstMatches.length - firstWins}L)
+                </span>
+                <span class="turn-stat" style="background-color: ${secondColor}20; color: ${secondColor}; font-weight: 600;">
+                    Second: ${secondWinRate}${secondWinRate !== 'N/A' ? '%' : ''} (${secondWins}W-${secondMatches.length - secondWins}L)
+                </span>
+            </div>
+        </div>
+        
+        ${matchupArray.length > 0 ? `
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px;">Matchup Breakdown</h3>
+                <div class="leader-stats">
+                    ${matchupArray.map(stat => {
+                        const matchupWinRate = ((stat.wins / stat.total) * 100).toFixed(1);
+                        const opposingDisplayName = getLeaderDisplayName(stat.leader);
+                        const opposingImage = stat.leader.image || 'https://via.placeholder.com/80x112?text=No+Image';
+                        const matchupColor = getWinRateColor(matchupWinRate);
+                        
+                        return `
+                            <div class="leader-stat-item">
+                                <img src="${opposingImage}" alt="${stat.leader.name}" class="leader-stat-image" title="${opposingDisplayName}">
+                                <div class="leader-stat-content">
+                                    <div class="leader-name">vs ${opposingDisplayName}</div>
+                                    <div class="leader-record">
+                                        <span class="record-detail"><strong>${stat.wins}W</strong> - <strong>${stat.losses}L</strong></span>
+                                        <span class="record-detail" style="color: ${matchupColor}; font-weight: 600;">(${matchupWinRate}%)</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${matchupWinRate}%; background: ${matchupColor};"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        ` : ''}
+        
+        ${tournament.notes ? `
+            <div style="margin-bottom: 20px;">
+                <h3 style="margin-bottom: 10px;">Notes</h3>
+                <p style="padding: 15px; background: rgba(0,122,255,0.05); border-radius: 10px;">${tournament.notes}</p>
+            </div>
+        ` : ''}
+        
+        <div>
+            <h3 style="margin-bottom: 15px;">Matches (${total})</h3>
+            <button class="add-tournament-btn" onclick="addMatchToTournament()" style="margin-bottom: 15px;">➕ Add Match to Tournament</button>
+            ${total > 0 ? `
+                <div class="match-history">
+                    ${tournamentMatches.map(match => {
+                        const date = new Date(match.date);
+                        const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const myLeaderDisplay = getLeaderDisplayName(match.myLeader);
+                        const oppLeaderDisplay = getLeaderDisplayName(match.opponentLeader);
+                        const turnOrderText = match.turnOrder === 'first' ? '🥇 1st' : '🥈 2nd';
+                        const myLeaderImage = match.myLeader.image || 'https://via.placeholder.com/60x84?text=No+Image';
+                        const oppLeaderImage = match.opponentLeader.image || 'https://via.placeholder.com/60x84?text=No+Image';
+                        
+                        return `
+                            <div class="match-item ${match.result}">
+                                <div class="match-leaders-container">
+                                    <div class="leader-images">
+                                        <img src="${myLeaderImage}" alt="${match.myLeader.name}" class="leader-card-img" title="${myLeaderDisplay}">
+                                        <span class="vs-text">VS</span>
+                                        <img src="${oppLeaderImage}" alt="${match.opponentLeader.name}" class="leader-card-img" title="${oppLeaderDisplay}">
+                                    </div>
+                                    <div class="match-info">
+                                        <div class="match-leaders">
+                                            ${myLeaderDisplay} vs ${oppLeaderDisplay}
+                                        </div>
+                                        <div class="match-date">
+                                            ${dateStr} ${match.turnOrder ? `• ${turnOrderText}` : ''}
+                                        </div>
+                                        ${match.notes ? `<div class="match-notes">📝 ${match.notes}</div>` : ''}
+                                    </div>
+                                </div>
+                                <div class="match-actions">
+                                    <div class="match-result ${match.result}">
+                                        ${match.result === 'win' ? 'WIN' : 'LOSS'}
+                                    </div>
+                                    <button class="match-delete-btn" onclick="event.stopPropagation(); removeMatchFromTournament(${match.id})" title="Remove from tournament">×</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : '<p class="empty-state">No matches added yet. Click "Add Match to Tournament" to get started!</p>'}
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+// Close tournament detail modal
+function closeTournamentDetail() {
+    const modal = document.getElementById('tournamentDetailModal');
+    modal.style.display = 'none';
+    currentTournamentId = null;
+}
+
+// Add match to tournament
+function addMatchToTournament() {
+    const availableMatches = matches.filter(m => !tournaments.some(t => t.matchIds.includes(m.id)));
+    
+    if (availableMatches.length === 0) {
+        alert('No available matches to add. All matches are either already in tournaments or you need to record new matches first.');
+        return;
+    }
+    
+    // Create a simple selection interface
+    const matchOptions = availableMatches.map((match, index) => {
+        const myLeaderDisplay = getLeaderDisplayName(match.myLeader);
+        const oppLeaderDisplay = getLeaderDisplayName(match.opponentLeader);
+        const date = new Date(match.date).toLocaleDateString();
+        const result = match.result === 'win' ? 'W' : 'L';
+        return `${index + 1}. ${myLeaderDisplay} vs ${oppLeaderDisplay} (${result}) - ${date}`;
+    }).join('\n');
+    
+    const selection = prompt(`Select match number to add:\n\n${matchOptions}\n\nEnter number (1-${availableMatches.length}):`);
+    
+    if (selection) {
+        const index = parseInt(selection) - 1;
+        if (index >= 0 && index < availableMatches.length) {
+            const tournament = tournaments.find(t => t.id === currentTournamentId);
+            if (tournament) {
+                tournament.matchIds.push(availableMatches[index].id);
+                saveTournaments();
+                openTournamentDetail(currentTournamentId); // Refresh
+            }
+        } else {
+            alert('Invalid selection.');
+        }
+    }
+}
+
+// Remove match from tournament
+function removeMatchFromTournament(matchId) {
+    if (!confirm('Remove this match from the tournament?')) return;
+    
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (tournament) {
+        tournament.matchIds = tournament.matchIds.filter(id => id !== matchId);
+        saveTournaments();
+        openTournamentDetail(currentTournamentId); // Refresh
+    }
+}
+
+// Delete tournament
+function deleteTournament() {
+    if (!confirm('Are you sure you want to delete this tournament? The matches will remain in your match history.')) return;
+    
+    tournaments = tournaments.filter(t => t.id !== currentTournamentId);
+    saveTournaments();
+    updateTournamentsList();
+    closeTournamentDetail();
 }
 
 // Initialize app when DOM is ready
