@@ -2002,7 +2002,11 @@ function updateTournamentProgress() {
 // Close tournament match modal
 function closeTournamentMatchModal() {
     const tournament = tournaments.find(t => t.id === currentTournamentId);
-    if (tournament && tournament.matches.length < tournament.rounds) {
+    
+    // Only show confirmation if tournament is in progress AND user has entered data in current form
+    const hasFormData = tournamentSelectedMyLeader || tournamentSelectedOpponentLeader || tournamentSelectedResult || tournamentSelectedTurnOrder;
+    
+    if (tournament && tournament.matches.length < tournament.rounds && hasFormData) {
         if (!confirm(`You have only completed ${tournament.matches.length} of ${tournament.rounds} rounds. Are you sure you want to close? You can continue later.`)) {
             return;
         }
