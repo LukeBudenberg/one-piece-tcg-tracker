@@ -2608,6 +2608,35 @@ function saveEditTournamentMatch() {
     closeEditTournamentMatch();
 }
 
+// Page Navigation
+function showPage(pageName) {
+    // Hide all pages
+    document.querySelectorAll('.page-content').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // Remove active state from all nav buttons
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected page
+    const pageId = `page${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+    const pageElement = document.getElementById(pageId);
+    if (pageElement) {
+        pageElement.classList.add('active');
+    }
+    
+    // Set active nav button
+    const navButton = document.getElementById(`nav${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`);
+    if (navButton) {
+        navButton.classList.add('active');
+    }
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 // Initialize app when DOM is ready
 document.addEventListener('DOMContentLoaded', init);
 

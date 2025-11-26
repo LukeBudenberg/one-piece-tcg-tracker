@@ -24,12 +24,32 @@
             <button class="edit-name-btn" onclick="openNameEditor()" title="Edit your name">✏️</button>
         </header>
 
+        <!-- Navigation Bar -->
+        <nav class="main-nav">
+            <button class="nav-btn active" onclick="showPage('record')" id="navRecord">
+                ⚔️ Record Match
+            </button>
+            <button class="nav-btn" onclick="showPage('leaders')" id="navLeaders">
+                👑 Your Leaders
+            </button>
+            <button class="nav-btn" onclick="showPage('matchups')" id="navMatchups">
+                📊 Matchups
+            </button>
+            <button class="nav-btn" onclick="showPage('tournaments')" id="navTournaments">
+                🏆 Tournaments
+            </button>
+            <button class="nav-btn" onclick="showPage('history')" id="navHistory">
+                📜 Match History
+            </button>
+        </nav>
+
+        <!-- Record Match Page -->
+        <div class="page-content active" id="pageRecord">
         <div class="card">
-            <div class="card-header collapsible" onclick="toggleSection('recordMatchSection')">
+            <div class="card-header">
                 <h2>Record New Match</h2>
-                <span class="collapse-icon" id="recordMatchSectionIcon">▼</span>
             </div>
-            <div id="recordMatchSection" class="collapsible-content">
+            <div class="card-content">
             <form id="matchForm">
                 <div class="form-group">
                     <label for="myLeaderName">Your Leader</label>
@@ -118,37 +138,46 @@
             </form>
             </div>
         </div>
+        </div>
+        <!-- End Record Match Page -->
 
+        <!-- Your Leaders Page -->
+        <div class="page-content" id="pageLeaders">
         <div class="card">
-            <div class="card-header collapsible" onclick="toggleSection('yourLeaders')">
+            <div class="card-header">
                 <h2>Your Leaders</h2>
-                <span class="collapse-icon" id="yourLeadersIcon">▼</span>
             </div>
-            <div id="yourLeaders" class="collapsible-content">
+            <div class="card-content">
                 <div id="myLeadersStats" class="leader-stats">
                     <p class="empty-state">Leader stats will appear after recording matches.</p>
                 </div>
             </div>
         </div>
+        </div>
+        <!-- End Your Leaders Page -->
 
+        <!-- Matchups Page -->
+        <div class="page-content" id="pageMatchups">
         <div class="card">
-            <div class="card-header collapsible" onclick="toggleSection('matchupStatsSection')">
+            <div class="card-header">
                 <h2>Matchup Statistics (vs Opponents)</h2>
-                <span class="collapse-icon" id="matchupStatsSectionIcon">▼</span>
             </div>
-            <div id="matchupStatsSection" class="collapsible-content">
+            <div class="card-content">
                 <div id="matchupStats" class="leader-stats">
                     <p class="empty-state">Matchup stats will appear after recording matches.</p>
                 </div>
             </div>
         </div>
+        </div>
+        <!-- End Matchups Page -->
 
+        <!-- Tournaments Page -->
+        <div class="page-content" id="pageTournaments">
         <div class="card">
-            <div class="card-header collapsible" onclick="toggleSection('tournamentsSection')">
+            <div class="card-header">
                 <h2>🏆 Tournaments</h2>
-                <span class="collapse-icon" id="tournamentsSectionIcon">▼</span>
             </div>
-            <div id="tournamentsSection" class="collapsible-content">
+            <div class="card-content">
                 <button class="add-tournament-btn" onclick="openCreateTournament()">➕ Create Tournament</button>
                 <div id="tournamentsList" class="tournaments-list">
                     <p class="empty-state">No tournaments recorded yet. Create one to start tracking!</p>
@@ -156,14 +185,17 @@
                 <button class="clear-all-btn" onclick="clearAllTournaments()" style="display: none;">🗑️ Clear All Tournaments</button>
             </div>
         </div>
+        </div>
+        <!-- End Tournaments Page -->
 
+        <!-- Match History Page -->
+        <div class="page-content" id="pageHistory">
         <div class="card">
-            <div class="card-header collapsible" onclick="toggleSection('matchHistorySection')">
+            <div class="card-header">
                 <h2>Match History</h2>
-                <span class="collapse-icon" id="matchHistorySectionIcon">▼</span>
             </div>
-            <div id="matchHistorySection" class="collapsible-content">
-                <div class="filters-header" onclick="toggleSection('filtersContent')">
+            <div class="card-content">
+                <div class="filters-header collapsible" onclick="toggleSection('filtersContent')">
                     <h3>🔍 Filters</h3>
                     <span class="collapse-icon" id="filtersContentIcon">▶</span>
                 </div>
@@ -292,6 +324,9 @@
                 </div>
             </div>
         </div>
+        </div>
+        <!-- End Match History Page -->
+
     </div>
 
     <!-- Leader Detail View -->
