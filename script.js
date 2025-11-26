@@ -2110,22 +2110,26 @@ function updateTournamentsList() {
     const sortedTournaments = [...tournaments].sort((a, b) => new Date(b.date) - new Date(a.date));
     
     container.innerHTML = sortedTournaments.map(tournament => {
-        const wins = tournament.matches.filter(m => m.result === 'win').length;
-        const losses = tournament.matches.filter(m => m.result === 'loss').length;
-        const total = tournament.matches.length;
+        // Handle both old format (matchIds) and new format (matches array)
+        const tournamentMatches = tournament.matches || [];
+        const wins = tournamentMatches.filter(m => m.result === 'win').length;
+        const losses = tournamentMatches.filter(m => m.result === 'loss').length;
+        const total = tournamentMatches.length;
         const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
         const winRateColor = total > 0 ? getWinRateColor(winRate) : '#8E8E93';
         
         const dateObj = new Date(tournament.date);
         const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         
-        const status = tournament.completed ? '✅ Completed' : `⏳ In Progress (${total}/${tournament.rounds})`;
+        const tournamentName = tournament.type || tournament.name || 'Tournament';
+        const totalRounds = tournament.rounds || total;
+        const status = tournament.completed ? '✅ Completed' : `⏳ In Progress (${total}/${totalRounds})`;
         
         return `
             <div class="tournament-item" onclick="openTournamentDetail(${tournament.id})">
                 <div class="tournament-header">
                     <div>
-                        <div class="tournament-name">${tournament.type}</div>
+                        <div class="tournament-name">${tournamentName}</div>
                         <div class="tournament-date">📅 ${dateStr}${tournament.location ? ` • 📍 ${tournament.location}` : ''}${tournament.format ? ` • ${tournament.format}` : ''}</div>
                     </div>
                     <div class="tournament-placement" style="${tournament.completed ? '' : 'background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);'}">${status}</div>
@@ -2141,10 +2145,10 @@ function updateTournamentsList() {
                     </div>
                     <div class="tournament-stat">
                         <span class="tournament-stat-label">Rounds</span>
-                        <span class="tournament-stat-value">${total}/${tournament.rounds}</span>
+                        <span class="tournament-stat-value">${total}/${totalRounds}</span>
                     </div>
                 </div>
-                ${!tournament.completed ? `
+                ${!tournament.completed && tournament.rounds ? `
                     <button class="add-tournament-btn" onclick="event.stopPropagation(); continueTournament(${tournament.id})" style="margin-top: 15px; padding: 10px;">➕ Continue Tournament</button>
                 ` : ''}
             </div>
@@ -2168,9 +2172,10 @@ function openTournamentDetail(tournamentId) {
     const title = document.getElementById('tournamentDetailTitle');
     const content = document.getElementById('tournamentDetailContent');
     
-    title.textContent = `🏆 ${tournament.type}`;
+    const tournamentName = tournament.type || tournament.name || 'Tournament';
+    title.textContent = `🏆 ${tournamentName}`;
     
-    const tournamentMatches = tournament.matches;
+    const tournamentMatches = tournament.matches || [];
     const wins = tournamentMatches.filter(m => m.result === 'win').length;
     const losses = tournamentMatches.filter(m => m.result === 'loss').length;
     const total = tournamentMatches.length;
@@ -2246,12 +2251,12 @@ function openTournamentDetail(tournamentId) {
                 <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
             </div>
             <div class="tournament-stat">
-                <span class="tournament-stat-label">Rounds</span>
-                <span class="tournament-stat-value">${total}/${tournament.rounds}</span>
+                <span class="tournament-stat-label">${tournament.rounds ? 'Rounds' : 'Matches'}</span>
+                <span class="tournament-stat-value">${tournament.rounds ? `${total}/${tournament.rounds}` : total}</span>
             </div>
         </div>
         
-        ${!tournament.completed ? `
+        ${!tournament.completed && tournament.rounds ? `
             <button class="add-tournament-btn" onclick="continueTournament(${tournament.id}); closeTournamentDetail();" style="margin-bottom: 20px;">➕ Continue Tournament</button>
         ` : ''}
         
