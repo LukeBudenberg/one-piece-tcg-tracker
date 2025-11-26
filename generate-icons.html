@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icons</title></head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+
+sizes.forEach(size => {
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Gradient background
+    const gradient = ctx.createLinearGradient(0, 0, size, size);
+    gradient.addColorStop(0, '#667eea');
+    gradient.addColorStop(1, '#764ba2');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    
+    // White anchor emoji
+    ctx.fillStyle = 'white';
+    ctx.font = `bold ${size * 0.4}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⚓', size / 2, size / 2.2);
+    
+    // Text
+    ctx.font = `bold ${size * 0.12}px Arial`;
+    ctx.fillText('OPTCG', size / 2, size * 0.75);
+    
+    // Download
+    const link = document.createElement('a');
+    link.download = `icon-${size}x${size}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+});
+
+alert('Icons downloaded! Move them to the icons/ folder.');
+</script>
+</body>
+</html>
