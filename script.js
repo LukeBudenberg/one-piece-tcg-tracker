@@ -139,6 +139,10 @@ let backgroundCarouselInterval = null;
 let userName = ''; // Store user's name
 let tournaments = []; // Store tournaments
 let currentTournamentId = null; // Track current tournament being viewed
+let tournamentSelectedMyLeader = null;
+let tournamentSelectedOpponentLeader = null;
+let tournamentSelectedResult = null;
+let tournamentSelectedTurnOrder = null;
 
 // Initialize app
 async function init() {
@@ -1882,29 +1886,28 @@ function closeCreateTournament() {
     modal.style.display = 'none';
 }
 
-// Save tournament
+// Save tournament and start recording matches
 function saveTournament() {
-    const name = document.getElementById('tournamentName').value.trim();
+    const type = document.getElementById('tournamentType').value;
     const date = document.getElementById('tournamentDate').value;
+    const rounds = parseInt(document.getElementById('tournamentRounds').value);
     const format = document.getElementById('tournamentFormat').value;
     const location = document.getElementById('tournamentLocation').value.trim();
-    const placement = document.getElementById('tournamentPlacement').value.trim();
-    const notes = document.getElementById('tournamentNotes').value.trim();
     
-    if (!name || !date) {
-        alert('Please fill in required fields (Name and Date)');
+    if (!type || !date || !rounds) {
+        alert('Please fill in required fields (Tournament Type, Date, and Rounds)');
         return;
     }
     
     const tournament = {
         id: Date.now(),
-        name,
+        type,
         date,
+        rounds,
         format,
         location,
-        placement,
-        notes,
-        matchIds: [],
+        matches: [], // Store match data directly in tournament
+        completed: false,
         createdAt: new Date().toISOString()
     };
     
@@ -1913,10 +1916,179 @@ function saveTournament() {
     updateTournamentsList();
     closeCreateTournament();
     
-    // Ask if user wants to add matches now
-    if (confirm('Tournament created! Would you like to add matches to this tournament now?')) {
-        openTournamentDetail(tournament.id);
+    // Open match recording interface
+    currentTournamentId = tournament.id;
+    openTournamentMatchRecording();
+}
+
+// Open tournament match recording modal
+function openTournamentMatchRecording() {
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (!tournament) return;
+    
+    const modal = document.getElementById('recordTournamentMatchModal');
+    const title = document.getElementById('tournamentMatchTitle');
+    
+    // Populate leader selects
+    const myLeaderSelect = document.getElementById('tournamentMyLeader');
+    const opponentLeaderSelect = document.getElementById('tournamentOpponentLeader');
+    
+    myLeaderSelect.innerHTML = '<option value="">Select your leader...</option>';
+    opponentLeaderSelect.innerHTML = '<option value="">Select opponent\'s leader...</option>';
+    
+    allLeaders.forEach((leader, index) => {
+        const displayName = getLeaderDisplayName(leader);
+        myLeaderSelect.innerHTML += `<option value="${index}">${displayName}</option>`;
+        opponentLeaderSelect.innerHTML += `<option value="${index}">${displayName}</option>`;
+    });
+    
+    // Update title and progress
+    const currentRound = tournament.matches.length + 1;
+    title.textContent = `🏆 ${tournament.type} - Round ${currentRound}`;
+    
+    updateTournamentProgress();
+    
+    // Reset form
+    document.getElementById('tournamentMatchForm').reset();
+    tournamentSelectedMyLeader = null;
+    tournamentSelectedOpponentLeader = null;
+    tournamentSelectedResult = null;
+    tournamentSelectedTurnOrder = null;
+    
+    // Clear button selections
+    document.querySelectorAll('#recordTournamentMatchModal .choice-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('#recordTournamentMatchModal .result-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    modal.style.display = 'block';
+}
+
+// Update tournament progress display
+function updateTournamentProgress() {
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (!tournament) return;
+    
+    const progress = document.getElementById('tournamentProgress');
+    const currentRound = tournament.matches.length + 1;
+    const wins = tournament.matches.filter(m => m.result === 'win').length;
+    const losses = tournament.matches.filter(m => m.result === 'loss').length;
+    
+    progress.innerHTML = `
+        <h3>${tournament.type} - ${new Date(tournament.date).toLocaleDateString()}</h3>
+        <div class="progress-info">Round ${currentRound} of ${tournament.rounds}</div>
+        <div class="progress-record">Current Record: ${wins}W - ${losses}L</div>
+    `;
+}
+
+// Close tournament match modal
+function closeTournamentMatchModal() {
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (tournament && tournament.matches.length < tournament.rounds) {
+        if (!confirm(`You have only completed ${tournament.matches.length} of ${tournament.rounds} rounds. Are you sure you want to close? You can continue later.`)) {
+            return;
+        }
     }
+    
+    const modal = document.getElementById('recordTournamentMatchModal');
+    modal.style.display = 'none';
+    currentTournamentId = null;
+}
+
+// Select tournament my leader
+function selectTournamentMyLeader() {
+    const select = document.getElementById('tournamentMyLeader');
+    const index = parseInt(select.value);
+    if (!isNaN(index)) {
+        tournamentSelectedMyLeader = allLeaders[index];
+    }
+}
+
+// Select tournament opponent leader
+function selectTournamentOpponentLeader() {
+    const select = document.getElementById('tournamentOpponentLeader');
+    const index = parseInt(select.value);
+    if (!isNaN(index)) {
+        tournamentSelectedOpponentLeader = allLeaders[index];
+    }
+}
+
+// Select tournament turn order
+function selectTournamentTurnOrder(order) {
+    tournamentSelectedTurnOrder = order;
+    document.querySelectorAll('#recordTournamentMatchModal .choice-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+}
+
+// Select tournament result
+function selectTournamentResult(result) {
+    tournamentSelectedResult = result;
+    document.querySelectorAll('#recordTournamentMatchModal .result-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+}
+
+// Save tournament match
+function saveTournamentMatch() {
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (!tournament) return;
+    
+    const notes = document.getElementById('tournamentMatchNotes').value.trim();
+    
+    if (!tournamentSelectedMyLeader || !tournamentSelectedOpponentLeader || !tournamentSelectedResult) {
+        alert('Please select your leader, opponent\'s leader, and match result');
+        return;
+    }
+    
+    const match = {
+        id: Date.now(),
+        myLeader: tournamentSelectedMyLeader,
+        opponentLeader: tournamentSelectedOpponentLeader,
+        result: tournamentSelectedResult,
+        turnOrder: tournamentSelectedTurnOrder,
+        format: tournament.format,
+        notes,
+        date: new Date().toISOString(),
+        tournamentId: tournament.id
+    };
+    
+    // Add to tournament
+    tournament.matches.push(match);
+    
+    // Also add to global matches array
+    matches.push(match);
+    saveMatches();
+    
+    // Check if tournament is complete
+    if (tournament.matches.length >= tournament.rounds) {
+        tournament.completed = true;
+        saveTournaments();
+        updateTournamentsList();
+        updateUI();
+        closeTournamentMatchModal();
+        alert(`🏆 Tournament Complete!\n\nFinal Record: ${tournament.matches.filter(m => m.result === 'win').length}W - ${tournament.matches.filter(m => m.result === 'loss').length}L`);
+        return;
+    }
+    
+    // Save and continue to next round
+    saveTournaments();
+    updateTournamentsList();
+    updateUI();
+    
+    // Reset form for next match
+    document.getElementById('tournamentMatchForm').reset();
+    tournamentSelectedMyLeader = null;
+    tournamentSelectedOpponentLeader = null;
+    tournamentSelectedResult = null;
+    tournamentSelectedTurnOrder = null;
+    document.querySelectorAll('#recordTournamentMatchModal .choice-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('#recordTournamentMatchModal .result-btn').forEach(btn => btn.classList.remove('selected'));
+    
+    // Update progress
+    updateTournamentProgress();
+    const currentRound = tournament.matches.length + 1;
+    document.getElementById('tournamentMatchTitle').textContent = `🏆 ${tournament.type} - Round ${currentRound}`;
 }
 
 // Update tournaments list
@@ -1932,25 +2104,25 @@ function updateTournamentsList() {
     const sortedTournaments = [...tournaments].sort((a, b) => new Date(b.date) - new Date(a.date));
     
     container.innerHTML = sortedTournaments.map(tournament => {
-        // Get matches for this tournament
-        const tournamentMatches = matches.filter(m => tournament.matchIds.includes(m.id));
-        const wins = tournamentMatches.filter(m => m.result === 'win').length;
-        const losses = tournamentMatches.filter(m => m.result === 'loss').length;
-        const total = tournamentMatches.length;
+        const wins = tournament.matches.filter(m => m.result === 'win').length;
+        const losses = tournament.matches.filter(m => m.result === 'loss').length;
+        const total = tournament.matches.length;
         const winRate = total > 0 ? ((wins / total) * 100).toFixed(1) : '0.0';
         const winRateColor = total > 0 ? getWinRateColor(winRate) : '#8E8E93';
         
         const dateObj = new Date(tournament.date);
         const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         
+        const status = tournament.completed ? '✅ Completed' : `⏳ In Progress (${total}/${tournament.rounds})`;
+        
         return `
             <div class="tournament-item" onclick="openTournamentDetail(${tournament.id})">
                 <div class="tournament-header">
                     <div>
-                        <div class="tournament-name">${tournament.name}</div>
+                        <div class="tournament-name">${tournament.type}</div>
                         <div class="tournament-date">📅 ${dateStr}${tournament.location ? ` • 📍 ${tournament.location}` : ''}${tournament.format ? ` • ${tournament.format}` : ''}</div>
                     </div>
-                    ${tournament.placement ? `<div class="tournament-placement">${tournament.placement}</div>` : ''}
+                    <div class="tournament-placement" style="${tournament.completed ? '' : 'background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%);'}">${status}</div>
                 </div>
                 <div class="tournament-stats">
                     <div class="tournament-stat">
@@ -1962,13 +2134,22 @@ function updateTournamentsList() {
                         <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
                     </div>
                     <div class="tournament-stat">
-                        <span class="tournament-stat-label">Matches</span>
-                        <span class="tournament-stat-value">${total}</span>
+                        <span class="tournament-stat-label">Rounds</span>
+                        <span class="tournament-stat-value">${total}/${tournament.rounds}</span>
                     </div>
                 </div>
+                ${!tournament.completed ? `
+                    <button class="add-tournament-btn" onclick="event.stopPropagation(); continueTournament(${tournament.id})" style="margin-top: 15px; padding: 10px;">➕ Continue Tournament</button>
+                ` : ''}
             </div>
         `;
     }).join('');
+}
+
+// Continue tournament
+function continueTournament(tournamentId) {
+    currentTournamentId = tournamentId;
+    openTournamentMatchRecording();
 }
 
 // Open tournament detail modal
@@ -1981,10 +2162,9 @@ function openTournamentDetail(tournamentId) {
     const title = document.getElementById('tournamentDetailTitle');
     const content = document.getElementById('tournamentDetailContent');
     
-    title.textContent = `🏆 ${tournament.name}`;
+    title.textContent = `🏆 ${tournament.type}`;
     
-    // Get tournament matches
-    const tournamentMatches = matches.filter(m => tournament.matchIds.includes(m.id));
+    const tournamentMatches = tournament.matches;
     const wins = tournamentMatches.filter(m => m.result === 'win').length;
     const losses = tournamentMatches.filter(m => m.result === 'loss').length;
     const total = tournamentMatches.length;
@@ -2044,12 +2224,10 @@ function openTournamentDetail(tournamentId) {
                     <div class="tournament-info-value">${tournament.location}</div>
                 </div>
             ` : ''}
-            ${tournament.placement ? `
-                <div class="tournament-info-item">
-                    <div class="tournament-info-label">Placement</div>
-                    <div class="tournament-info-value">${tournament.placement}</div>
-                </div>
-            ` : ''}
+            <div class="tournament-info-item">
+                <div class="tournament-info-label">Status</div>
+                <div class="tournament-info-value">${tournament.completed ? '✅ Completed' : '⏳ In Progress'}</div>
+            </div>
         </div>
         
         <div class="tournament-stats" style="margin-bottom: 30px;">
@@ -2062,22 +2240,28 @@ function openTournamentDetail(tournamentId) {
                 <span class="tournament-stat-value" style="color: ${winRateColor}">${winRate}%</span>
             </div>
             <div class="tournament-stat">
-                <span class="tournament-stat-label">Total Matches</span>
-                <span class="tournament-stat-value">${total}</span>
+                <span class="tournament-stat-label">Rounds</span>
+                <span class="tournament-stat-value">${total}/${tournament.rounds}</span>
             </div>
         </div>
         
-        <div style="margin-bottom: 30px;">
-            <h3 style="margin-bottom: 15px;">Turn Order Performance</h3>
-            <div class="turn-order-stats">
-                <span class="turn-stat" style="background-color: ${firstColor}20; color: ${firstColor}; font-weight: 600;">
-                    First: ${firstWinRate}${firstWinRate !== 'N/A' ? '%' : ''} (${firstWins}W-${firstMatches.length - firstWins}L)
-                </span>
-                <span class="turn-stat" style="background-color: ${secondColor}20; color: ${secondColor}; font-weight: 600;">
-                    Second: ${secondWinRate}${secondWinRate !== 'N/A' ? '%' : ''} (${secondWins}W-${secondMatches.length - secondWins}L)
-                </span>
+        ${!tournament.completed ? `
+            <button class="add-tournament-btn" onclick="continueTournament(${tournament.id}); closeTournamentDetail();" style="margin-bottom: 20px;">➕ Continue Tournament</button>
+        ` : ''}
+        
+        ${total > 0 ? `
+            <div style="margin-bottom: 30px;">
+                <h3 style="margin-bottom: 15px;">Turn Order Performance</h3>
+                <div class="turn-order-stats">
+                    <span class="turn-stat" style="background-color: ${firstColor}20; color: ${firstColor}; font-weight: 600;">
+                        First: ${firstWinRate}${firstWinRate !== 'N/A' ? '%' : ''} (${firstWins}W-${firstMatches.length - firstWins}L)
+                    </span>
+                    <span class="turn-stat" style="background-color: ${secondColor}20; color: ${secondColor}; font-weight: 600;">
+                        Second: ${secondWinRate}${secondWinRate !== 'N/A' ? '%' : ''} (${secondWins}W-${secondMatches.length - secondWins}L)
+                    </span>
+                </div>
             </div>
-        </div>
+        ` : ''}
         
         ${matchupArray.length > 0 ? `
             <div style="margin-bottom: 30px;">
@@ -2109,24 +2293,16 @@ function openTournamentDetail(tournamentId) {
             </div>
         ` : ''}
         
-        ${tournament.notes ? `
-            <div style="margin-bottom: 20px;">
-                <h3 style="margin-bottom: 10px;">Notes</h3>
-                <p style="padding: 15px; background: rgba(0,122,255,0.05); border-radius: 10px;">${tournament.notes}</p>
-            </div>
-        ` : ''}
-        
         <div>
             <h3 style="margin-bottom: 15px;">Matches (${total})</h3>
-            <button class="add-tournament-btn" onclick="addMatchToTournament()" style="margin-bottom: 15px;">➕ Add Match to Tournament</button>
             ${total > 0 ? `
                 <div class="match-history">
-                    ${tournamentMatches.map(match => {
+                    ${tournamentMatches.map((match, index) => {
                         const date = new Date(match.date);
                         const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                         const myLeaderDisplay = getLeaderDisplayName(match.myLeader);
                         const oppLeaderDisplay = getLeaderDisplayName(match.opponentLeader);
-                        const turnOrderText = match.turnOrder === 'first' ? '🥇 1st' : '🥈 2nd';
+                        const turnOrderText = match.turnOrder === 'first' ? '🥇 1st' : match.turnOrder === 'second' ? '🥈 2nd' : '';
                         const myLeaderImage = match.myLeader.image || 'https://via.placeholder.com/60x84?text=No+Image';
                         const oppLeaderImage = match.opponentLeader.image || 'https://via.placeholder.com/60x84?text=No+Image';
                         
@@ -2140,10 +2316,10 @@ function openTournamentDetail(tournamentId) {
                                     </div>
                                     <div class="match-info">
                                         <div class="match-leaders">
-                                            ${myLeaderDisplay} vs ${oppLeaderDisplay}
+                                            Round ${index + 1}: ${myLeaderDisplay} vs ${oppLeaderDisplay}
                                         </div>
                                         <div class="match-date">
-                                            ${dateStr} ${match.turnOrder ? `• ${turnOrderText}` : ''}
+                                            ${dateStr} ${turnOrderText ? `• ${turnOrderText}` : ''}
                                         </div>
                                         ${match.notes ? `<div class="match-notes">📝 ${match.notes}</div>` : ''}
                                     </div>
@@ -2152,13 +2328,12 @@ function openTournamentDetail(tournamentId) {
                                     <div class="match-result ${match.result}">
                                         ${match.result === 'win' ? 'WIN' : 'LOSS'}
                                     </div>
-                                    <button class="match-delete-btn" onclick="event.stopPropagation(); removeMatchFromTournament(${match.id})" title="Remove from tournament">×</button>
                                 </div>
                             </div>
                         `;
                     }).join('')}
                 </div>
-            ` : '<p class="empty-state">No matches added yet. Click "Add Match to Tournament" to get started!</p>'}
+            ` : '<p class="empty-state">No matches recorded yet.</p>'}
         </div>
     `;
     
@@ -2172,55 +2347,11 @@ function closeTournamentDetail() {
     currentTournamentId = null;
 }
 
-// Add match to tournament
-function addMatchToTournament() {
-    const availableMatches = matches.filter(m => !tournaments.some(t => t.matchIds.includes(m.id)));
-    
-    if (availableMatches.length === 0) {
-        alert('No available matches to add. All matches are either already in tournaments or you need to record new matches first.');
-        return;
-    }
-    
-    // Create a simple selection interface
-    const matchOptions = availableMatches.map((match, index) => {
-        const myLeaderDisplay = getLeaderDisplayName(match.myLeader);
-        const oppLeaderDisplay = getLeaderDisplayName(match.opponentLeader);
-        const date = new Date(match.date).toLocaleDateString();
-        const result = match.result === 'win' ? 'W' : 'L';
-        return `${index + 1}. ${myLeaderDisplay} vs ${oppLeaderDisplay} (${result}) - ${date}`;
-    }).join('\n');
-    
-    const selection = prompt(`Select match number to add:\n\n${matchOptions}\n\nEnter number (1-${availableMatches.length}):`);
-    
-    if (selection) {
-        const index = parseInt(selection) - 1;
-        if (index >= 0 && index < availableMatches.length) {
-            const tournament = tournaments.find(t => t.id === currentTournamentId);
-            if (tournament) {
-                tournament.matchIds.push(availableMatches[index].id);
-                saveTournaments();
-                openTournamentDetail(currentTournamentId); // Refresh
-            }
-        } else {
-            alert('Invalid selection.');
-        }
-    }
-}
-
-// Remove match from tournament
-function removeMatchFromTournament(matchId) {
-    if (!confirm('Remove this match from the tournament?')) return;
-    
-    const tournament = tournaments.find(t => t.id === currentTournamentId);
-    if (tournament) {
-        tournament.matchIds = tournament.matchIds.filter(id => id !== matchId);
-        saveTournaments();
-        openTournamentDetail(currentTournamentId); // Refresh
-    }
-}
-
 // Delete tournament
 function deleteTournament() {
+    const tournament = tournaments.find(t => t.id === currentTournamentId);
+    if (!tournament) return;
+    
     if (!confirm('Are you sure you want to delete this tournament? The matches will remain in your match history.')) return;
     
     tournaments = tournaments.filter(t => t.id !== currentTournamentId);

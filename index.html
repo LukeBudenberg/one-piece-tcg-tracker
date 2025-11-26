@@ -624,8 +624,15 @@
             <div class="modal-body">
                 <form id="createTournamentForm">
                     <div class="form-group">
-                        <label for="tournamentName">Tournament Name *</label>
-                        <input type="text" id="tournamentName" required placeholder="e.g., Local Store Championship">
+                        <label for="tournamentType">Tournament *</label>
+                        <select id="tournamentType" required>
+                            <option value="">Select tournament type...</option>
+                            <option value="Store Weekly">Store Weekly</option>
+                            <option value="Treasure Cup">Treasure Cup</option>
+                            <option value="Regional">Regional</option>
+                            <option value="Store Championship">Store Championship</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                     
                     <div class="form-row">
@@ -633,6 +640,13 @@
                             <label for="tournamentDate">Date *</label>
                             <input type="date" id="tournamentDate" required>
                         </div>
+                        <div class="form-group">
+                            <label for="tournamentRounds">Rounds *</label>
+                            <input type="number" id="tournamentRounds" min="1" max="20" required placeholder="e.g., 4">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="tournamentFormat">Format</label>
                             <select id="tournamentFormat">
@@ -657,24 +671,73 @@
                                 <option value="EB-04">EB-04 Block</option>
                             </select>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tournamentLocation">Location</label>
-                        <input type="text" id="tournamentLocation" placeholder="e.g., Game Store Name">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tournamentPlacement">Final Placement</label>
-                        <input type="text" id="tournamentPlacement" placeholder="e.g., 1st, Top 4, Top 8">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tournamentNotes">Notes</label>
-                        <textarea id="tournamentNotes" rows="3" placeholder="Any additional notes about the tournament..."></textarea>
+                        <div class="form-group">
+                            <label for="tournamentLocation">Location</label>
+                            <input type="text" id="tournamentLocation" placeholder="e.g., Game Store Name">
+                        </div>
                     </div>
                 </form>
             </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeCreateTournament()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveTournament()">Start Tournament</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Tournament Match Modal -->
+    <div id="recordTournamentMatchModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="tournamentMatchTitle">🏆 Record Match</h2>
+                <span class="modal-close" onclick="closeTournamentMatchModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="tournamentProgress" class="tournament-progress-bar"></div>
+                
+                <form id="tournamentMatchForm">
+                    <div class="form-group">
+                        <label>Your Leader *</label>
+                        <select id="tournamentMyLeader" required onchange="selectTournamentMyLeader()">
+                            <option value="">Select your leader...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Opponent's Leader *</label>
+                        <select id="tournamentOpponentLeader" required onchange="selectTournamentOpponentLeader()">
+                            <option value="">Select opponent's leader...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Turn Order</label>
+                        <div class="button-group">
+                            <button type="button" class="choice-btn" onclick="selectTournamentTurnOrder('first')">🥇 Went First</button>
+                            <button type="button" class="choice-btn" onclick="selectTournamentTurnOrder('second')">🥈 Went Second</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Result *</label>
+                        <div class="result-buttons">
+                            <button type="button" class="result-btn win-btn" onclick="selectTournamentResult('win')">✓ Win</button>
+                            <button type="button" class="result-btn loss-btn" onclick="selectTournamentResult('loss')">✗ Loss</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tournamentMatchNotes">Notes</label>
+                        <textarea id="tournamentMatchNotes" maxlength="500" placeholder="Add any notes about this match..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeTournamentMatchModal()">Close Tournament</button>
+                <button class="modal-btn save-btn" onclick="saveTournamentMatch()">Save & Continue</button>
+            </div>
+        </div>
+    </div>
             <div class="modal-footer">
                 <button class="modal-btn cancel-btn" onclick="closeCreateTournament()">Cancel</button>
                 <button class="modal-btn save-btn" onclick="saveTournament()">Create Tournament</button>
