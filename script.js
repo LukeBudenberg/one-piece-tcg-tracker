@@ -739,7 +739,30 @@ function updateMatchupStats() {
 function updateMatchHistory() {
     const container = document.getElementById('matchHistory');
     
-    if (matches.length === 0) {
+    // Combine matches from global array and tournament matches
+    const allMatches = [...matches];
+    
+    // Add any tournament matches that might not be in global matches array
+    tournaments.forEach(tournament => {
+        if (tournament.matches) {
+            tournament.matches.forEach(tMatch => {
+                // Check if this match is already in global matches
+                if (!allMatches.find(m => m.id === tMatch.id)) {
+                    // Add tournament info to the match
+                    allMatches.push({
+                        ...tMatch,
+                        tournamentName: tournament.type || tournament.name,
+                        tournamentId: tournament.id
+                    });
+                }
+            });
+        }
+    });
+    
+    // Sort by date (newest first)
+    allMatches.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    if (allMatches.length === 0) {
         container.innerHTML = '<p class="empty-state">No matches recorded yet. Start tracking your battles!</p>';
         populateFilterDropdowns();
         return;
@@ -758,7 +781,7 @@ function updateMatchHistory() {
         .map(cb => cb.value);
 
     // Apply filters (OR logic within each category, AND logic between categories)
-    const filteredMatches = matches.filter(match => {
+    const filteredMatches = allMatches.filter(match => {
         // Filter by my leader (OR logic - match any selected)
         if (filterMyLeaders.length > 0 && !filterMyLeaders.includes(getLeaderKey(match.myLeader))) {
             return false;
@@ -826,7 +849,7 @@ function updateMatchHistory() {
                             ${myLeaderDisplay} vs ${oppLeaderDisplay}
                         </div>
                         <div class="match-date">
-                            ${dateStr} ${match.turnOrder ? `• ${turnOrderText}` : ''}${match.gameFormat ? ` • ${match.gameFormat}` : ''}
+                            ${dateStr} ${match.turnOrder ? `• ${turnOrderText}` : ''}${match.gameFormat || match.format ? ` • ${match.gameFormat || match.format}` : ''}${match.tournamentName ? ` • 🏆 ${match.tournamentName}` : ''}
                         </div>
                         ${match.notes ? `<div class="match-notes">📝 ${match.notes}</div>` : ''}
                     </div>
@@ -2080,7 +2103,8 @@ function saveTournamentMatch() {
         format: tournament.format,
         notes,
         date: new Date().toISOString(),
-        tournamentId: tournament.id
+        tournamentId: tournament.id,
+        tournamentName: tournament.type || tournament.name
     };
     
     // Add to tournament
