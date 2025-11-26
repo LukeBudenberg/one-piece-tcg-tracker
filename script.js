@@ -400,6 +400,8 @@ function clearForm() {
     editingMatchId = null;
     document.getElementById('charCount').textContent = '0';
     document.getElementById('submitBtn').textContent = 'Save Match';
+    clearLeaderImages('myLeaderImages');
+    clearLeaderImages('opponentLeaderImages');
     updateSubmitButton();
 }
 
@@ -1995,6 +1997,8 @@ function openTournamentMatchRecording() {
     tournamentSelectedOpponentLeader = null;
     tournamentSelectedResult = null;
     tournamentSelectedTurnOrder = null;
+    clearLeaderImages('tournamentMyLeaderImages');
+    clearLeaderImages('tournamentOpponentLeaderImages');
     
     // Auto-fill user's leader from previous match (if exists)
     if (tournament.matches.length > 0) {
@@ -2148,6 +2152,8 @@ function saveTournamentMatch() {
     tournamentSelectedOpponentLeader = null;
     tournamentSelectedResult = null;
     tournamentSelectedTurnOrder = null;
+    clearLeaderImages('tournamentMyLeaderImages');
+    clearLeaderImages('tournamentOpponentLeaderImages');
     document.querySelectorAll('#recordTournamentMatchModal .choice-btn').forEach(btn => btn.classList.remove('selected'));
     document.querySelectorAll('#recordTournamentMatchModal .result-btn').forEach(btn => btn.classList.remove('selected'));
     
@@ -2545,6 +2551,8 @@ function closeEditTournamentMatch() {
     editTournamentSelectedOpponentLeader = null;
     editTournamentSelectedResult = null;
     editTournamentSelectedTurnOrder = null;
+    clearLeaderImages('editTournamentMyLeaderImages');
+    clearLeaderImages('editTournamentOpponentLeaderImages');
 }
 
 // Select functions for edit modal
