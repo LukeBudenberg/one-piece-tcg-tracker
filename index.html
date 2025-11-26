@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One Piece TCG Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background carousel -->
+    <div id="backgroundCarousel" class="background-carousel">
+        <div class="background-overlay"></div>
+    </div>
+    
+    <div class="app-container" id="mainView">
+        <header>
+            <h1 id="appTitle">⚓ One Piece TCG Tracker</h1>
+            <p class="subtitle">Track Your Battle Journey</p>
+            <button class="settings-btn" onclick="openBackgroundSettings()">🎨 Background</button>
+            <button class="edit-name-btn" onclick="openNameEditor()" title="Edit your name">✏️</button>
+        </header>
+
+        <div class="card">
+            <div class="card-header collapsible" onclick="toggleSection('recordMatchSection')">
+                <h2>Record New Match</h2>
+                <span class="collapse-icon" id="recordMatchSectionIcon">▼</span>
+            </div>
+            <div id="recordMatchSection" class="collapsible-content">
+            <form id="matchForm">
+                <div class="form-group">
+                    <label for="myLeaderName">Your Leader</label>
+                    <select id="myLeaderName" required>
+                        <option value="">Select your leader...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="opponentLeaderName">Opponent's Leader</label>
+                    <select id="opponentLeaderName" required>
+                        <option value="">Select leader name...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="gameFormat">Game Format (Optional)</label>
+                    <select id="gameFormat">
+                        <option value="">Select format...</option>
+                        <option value="OP-01">OP-01 Block</option>
+                        <option value="OP-02">OP-02 Block</option>
+                        <option value="OP-03">OP-03 Block</option>
+                        <option value="OP-04">OP-04 Block</option>
+                        <option value="OP-05">OP-05 Block</option>
+                        <option value="OP-06">OP-06 Block</option>
+                        <option value="EB-01">EB-01 Block</option>
+                        <option value="OP-07">OP-07 Block</option>
+                        <option value="OP-08">OP-08 Block</option>
+                        <option value="OP-09">OP-09 Block</option>
+                        <option value="OP-10">OP-10 Block</option>
+                        <option value="OP-11">OP-11 Block</option>
+                        <option value="EB-02">EB-02 Block</option>
+                        <option value="OP-12">OP-12 Block</option>
+                        <option value="OP-13">OP-13 Block</option>
+                        <option value="OP-14">OP-14 Block</option>
+                        <option value="EB-03">EB-03 Block</option>
+                        <option value="EB-04">EB-04 Block</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Turn Order</label>
+                    <div class="result-buttons">
+                        <button type="button" class="result-btn turn-btn" data-turn="first">
+                            <span class="result-icon">1</span>
+                            <span>Went First</span>
+                        </button>
+                        <button type="button" class="result-btn turn-btn" data-turn="second">
+                            <span class="result-icon">2</span>
+                            <span>Went Second</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="turnOrder" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Match Result</label>
+                    <div class="result-buttons">
+                        <button type="button" class="result-btn win-btn" data-result="win">
+                            <span class="result-icon">✓</span>
+                            <span>Win</span>
+                        </button>
+                        <button type="button" class="result-btn loss-btn" data-result="loss">
+                            <span class="result-icon">✗</span>
+                            <span>Loss</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="result" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="matchNotes">Notes (Optional)</label>
+                    <textarea 
+                        id="matchNotes" 
+                        maxlength="500" 
+                        placeholder="Add any notes about this match (e.g., key plays, what worked, what didn't...)"
+                        rows="4"
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/500 characters
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="clear-btn" id="clearBtn">Clear All</button>
+                    <button type="submit" class="submit-btn" disabled id="submitBtn">Save Match</button>
+                </div>
+            </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header collapsible" onclick="toggleSection('yourLeaders')">
+                <h2>Your Leaders</h2>
+                <span class="collapse-icon" id="yourLeadersIcon">▼</span>
+            </div>
+            <div id="yourLeaders" class="collapsible-content">
+                <div id="myLeadersStats" class="leader-stats">
+                    <p class="empty-state">Leader stats will appear after recording matches.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header collapsible" onclick="toggleSection('matchupStatsSection')">
+                <h2>Matchup Statistics (vs Opponents)</h2>
+                <span class="collapse-icon" id="matchupStatsSectionIcon">▼</span>
+            </div>
+            <div id="matchupStatsSection" class="collapsible-content">
+                <div id="matchupStats" class="leader-stats">
+                    <p class="empty-state">Matchup stats will appear after recording matches.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header collapsible" onclick="toggleSection('matchHistorySection')">
+                <h2>Match History</h2>
+                <span class="collapse-icon" id="matchHistorySectionIcon">▼</span>
+            </div>
+            <div id="matchHistorySection" class="collapsible-content">
+                <div class="filters-header" onclick="toggleSection('filtersContent')">
+                    <h3>🔍 Filters</h3>
+                    <span class="collapse-icon" id="filtersContentIcon">▶</span>
+                </div>
+                <div id="filtersContent" class="collapsible-content" style="display: none;">
+                    <div class="filters-container">
+                        <div class="filter-info">
+                            <span>💡 Click options to filter your matches</span>
+                        </div>
+                    <div class="filter-group">
+                        <label>Your Leader</label>
+                        <div id="filterMyLeader" class="checkbox-group">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Format</label>
+                        <div id="filterFormat" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-01"> OP-01 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-02"> OP-02 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-03"> OP-03 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-04"> OP-04 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-05"> OP-05 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-06"> OP-06 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-01"> EB-01 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-07"> OP-07 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-08"> OP-08 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-09"> OP-09 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-10"> OP-10 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-11"> OP-11 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-02"> EB-02 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-12"> OP-12 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-13"> OP-13 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-14"> OP-14 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-03"> EB-03 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-04"> EB-04 Block
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Color</label>
+                        <div id="filterColor" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Red"> 🔴 Red
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Blue"> 🔵 Blue
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Green"> 🟢 Green
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Yellow"> 🟡 Yellow
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Purple"> 🟣 Purple
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Black"> ⚫ Black
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Result</label>
+                        <div id="filterResult" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="win"> Wins
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="loss"> Losses
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Turn Order</label>
+                        <div id="filterTurnOrder" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="first"> Went First
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="second"> Went Second
+                            </label>
+                        </div>
+                    </div>
+                    <button class="clear-filters-btn" onclick="clearAllFilters()">Clear Filters</button>
+                    </div>
+                </div>
+                <div id="matchHistory" class="match-history">
+                    <p class="empty-state">No matches recorded yet. Start tracking your battles!</p>
+                </div>
+                <div class="clear-history-container">
+                    <button class="clear-history-btn" onclick="confirmClearAllHistory()">🗑️ Clear All Match History</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leader Detail View -->
+    <div class="app-container" id="detailView" style="display: none;">
+        <header>
+            <button class="back-btn" onclick="showMainView()">← Back</button>
+            <h1 id="detailLeaderName">Leader Details</h1>
+        </header>
+
+        <!-- Edit Match Form (hidden by default) -->
+        <div id="editMatchFormContainer" class="card" style="display: none;">
+            <h2>Edit Match</h2>
+            <form id="editMatchForm">
+                <div class="form-group">
+                    <label for="editMyLeaderName">Your Leader</label>
+                    <select id="editMyLeaderName" required>
+                        <option value="">Select your leader...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editOpponentLeaderName">Opponent's Leader</label>
+                    <select id="editOpponentLeaderName" required>
+                        <option value="">Select leader name...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="editGameFormat">Game Format (Optional)</label>
+                    <select id="editGameFormat">
+                        <option value="">Select format...</option>
+                        <option value="OP-01">OP-01 Block</option>
+                        <option value="OP-02">OP-02 Block</option>
+                        <option value="OP-03">OP-03 Block</option>
+                        <option value="OP-04">OP-04 Block</option>
+                        <option value="OP-05">OP-05 Block</option>
+                        <option value="OP-06">OP-06 Block</option>
+                        <option value="EB-01">EB-01 Block</option>
+                        <option value="OP-07">OP-07 Block</option>
+                        <option value="OP-08">OP-08 Block</option>
+                        <option value="OP-09">OP-09 Block</option>
+                        <option value="OP-10">OP-10 Block</option>
+                        <option value="OP-11">OP-11 Block</option>
+                        <option value="EB-02">EB-02 Block</option>
+                        <option value="OP-12">OP-12 Block</option>
+                        <option value="OP-13">OP-13 Block</option>
+                        <option value="OP-14">OP-14 Block</option>
+                        <option value="EB-03">EB-03 Block</option>
+                        <option value="EB-04">EB-04 Block</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Turn Order</label>
+                    <div class="result-buttons">
+                        <button type="button" class="result-btn turn-btn-edit" data-turn="first">
+                            <span class="result-icon">1</span>
+                            <span>Went First</span>
+                        </button>
+                        <button type="button" class="result-btn turn-btn-edit" data-turn="second">
+                            <span class="result-icon">2</span>
+                            <span>Went Second</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="editTurnOrder" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Match Result</label>
+                    <div class="result-buttons">
+                        <button type="button" class="result-btn win-btn-edit" data-result="win">
+                            <span class="result-icon">✓</span>
+                            <span>Win</span>
+                        </button>
+                        <button type="button" class="result-btn loss-btn-edit" data-result="loss">
+                            <span class="result-icon">✗</span>
+                            <span>Loss</span>
+                        </button>
+                    </div>
+                    <input type="hidden" id="editResult" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editMatchNotes">Match Notes (Optional)</label>
+                    <textarea id="editMatchNotes" maxlength="500" placeholder="Add notes about the match..."></textarea>
+                    <div class="char-counter">
+                        <span id="editCharCount">0</span>/500 characters
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn" id="editSubmitBtn">Update Match</button>
+                    <button type="button" class="clear-btn" onclick="cancelEdit()">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Success message (hidden by default) -->
+        <div id="editSuccessMessage" class="success-message" style="display: none;">
+            ✓ Match updated successfully!
+        </div>
+
+        <div class="leader-detail-hero">
+            <img id="detailLeaderImage" src="" alt="Leader Card" class="detail-leader-card">
+        </div>
+
+        <div class="stats-overview">
+            <div class="stat-card">
+                <div class="stat-value" id="detailWins">0</div>
+                <div class="stat-label">Wins</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="detailLosses">0</div>
+                <div class="stat-label">Losses</div>
+            </div>
+            <div class="stat-card highlight">
+                <div class="stat-value" id="detailWinRate">0%</div>
+                <div class="stat-label">Win Rate</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Matchup Breakdown</h2>
+            <p class="matchup-description">Your performance against each opponent when using this leader</p>
+            <div id="detailMatchups" class="leader-stats">
+                <p class="empty-state">No matchup data available.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Match History</h2>
+            <div class="filters-header" onclick="toggleSection('detailFiltersContent')">
+                <h3>🔍 Filters</h3>
+                <span class="collapse-icon" id="detailFiltersContentIcon">▶</span>
+            </div>
+            <div id="detailFiltersContent" class="collapsible-content" style="display: none;">
+                <div class="filters-container">
+                    <div class="filter-info">
+                        <span>💡 Click options to filter your matches</span>
+                    </div>
+                    <div class="filter-group">
+                        <label>Opponent Leader</label>
+                        <div id="detailFilterOpponentLeader" class="checkbox-group">
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Format</label>
+                        <div id="detailFilterFormat" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-01"> OP-01 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-02"> OP-02 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-03"> OP-03 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-04"> OP-04 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-05"> OP-05 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-06"> OP-06 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-01"> EB-01 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-07"> OP-07 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-08"> OP-08 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-09"> OP-09 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-10"> OP-10 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-11"> OP-11 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-02"> EB-02 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-12"> OP-12 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-13"> OP-13 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="OP-14"> OP-14 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-03"> EB-03 Block
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="EB-04"> EB-04 Block
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Color</label>
+                        <div id="detailFilterColor" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Red"> 🔴 Red
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Blue"> 🔵 Blue
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Green"> 🟢 Green
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Yellow"> 🟡 Yellow
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Purple"> 🟣 Purple
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="Black"> ⚫ Black
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Result</label>
+                        <div id="detailFilterResult" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="win"> Wins
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="loss"> Losses
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Turn Order</label>
+                        <div id="detailFilterTurnOrder" class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="first"> Went First
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="second"> Went Second
+                            </label>
+                        </div>
+                    </div>
+                    <button class="clear-filters-btn" onclick="clearDetailFilters()">Clear Filters</button>
+                </div>
+            </div>
+            <div id="detailMatchHistory" class="match-history">
+                <p class="empty-state">No matches found.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Settings Modal -->
+    <div id="backgroundSettingsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🎨 Background Card Selection</h2>
+                <span class="modal-close" onclick="closeBackgroundSettings()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Select up to 10 favorite leader artworks to display as rotating backgrounds. Search and select from all available leader cards including parallels and alternate arts.</p>
+                
+                <div class="search-container">
+                    <input type="text" id="cardSearch" placeholder="Search for leader cards..." class="search-input">
+                </div>
+                
+                <div class="selected-cards-section">
+                    <h3>Selected Cards (<span id="selectedCount">0</span>/10)</h3>
+                    <div id="selectedCardsGrid" class="selected-cards-grid">
+                        <p class="empty-state">No cards selected yet</p>
+                    </div>
+                </div>
+                
+                <div class="available-cards-section">
+                    <h3>Available Leader Cards</h3>
+                    <div id="availableCardsGrid" class="available-cards-grid">
+                        <p class="empty-state">Loading cards...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeBackgroundSettings()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveBackgroundSettings()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Name Editor Modal -->
+    <div id="nameEditorModal" class="modal" style="display: none;">
+        <div class="modal-content name-editor-modal">
+            <div class="modal-header">
+                <h2>✏️ Edit Your Name</h2>
+                <span class="modal-close" onclick="closeNameEditor()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Personalize your tracker by adding your name to the title!</p>
+                
+                <div class="form-group">
+                    <label for="userName">Your Name</label>
+                    <input type="text" id="userName" class="name-input" placeholder="Enter your name..." maxlength="30">
+                    <p class="input-hint">Leave blank to use the default title</p>
+                </div>
+                
+                <div class="preview-section">
+                    <h3>Preview:</h3>
+                    <div class="title-preview" id="titlePreview">⚓ One Piece TCG Tracker</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeNameEditor()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveUserName()">Save Name</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
