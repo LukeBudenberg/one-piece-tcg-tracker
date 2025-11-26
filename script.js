@@ -1961,6 +1961,20 @@ function openTournamentMatchRecording() {
     tournamentSelectedResult = null;
     tournamentSelectedTurnOrder = null;
     
+    // Auto-fill user's leader from previous match (if exists)
+    if (tournament.matches.length > 0) {
+        const lastMatch = tournament.matches[tournament.matches.length - 1];
+        const lastLeaderIndex = allLeaders.findIndex(leader => 
+            getLeaderKey(leader) === getLeaderKey(lastMatch.myLeader)
+        );
+        
+        if (lastLeaderIndex !== -1) {
+            myLeaderSelect.value = lastLeaderIndex;
+            tournamentSelectedMyLeader = allLeaders[lastLeaderIndex];
+            console.log('Auto-filled leader from previous match:', getLeaderDisplayName(tournamentSelectedMyLeader));
+        }
+    }
+    
     // Clear button selections
     document.querySelectorAll('#recordTournamentMatchModal .choice-btn').forEach(btn => btn.classList.remove('selected'));
     document.querySelectorAll('#recordTournamentMatchModal .result-btn').forEach(btn => btn.classList.remove('selected'));
