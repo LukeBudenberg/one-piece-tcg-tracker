@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Restore Data - Fixed</title>
+</head>
+<body>
+    <h1>Restore Your Match History</h1>
+    <button onclick="restoreData()">Click to Restore Data</button>
+    <div id="status"></div>
+
+    <script>
+        function restoreData() {
+            const tournaments = [
+                {
+                    "id": 1764133341015,
+                    "type": "Store Weekly",
+                    "date": "2025-11-26",
+                    "rounds": 3,
+                    "format": "OP-13",
+                    "location": "game grid saratoga",
+                    "matches": [
+                        {
+                            "id": 1764133356847,
+                            "myLeader": {
+                                "name": "Portgas.D.Ace (002)",
+                                "colors": ["Blue", "Red"],
+                                "set": "OP-13",
+                                "cardId": "OP13-002",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP13-002_sy67sYO.jpg"
+                            },
+                            "opponentLeader": {
+                                "name": "Roronoa Zoro (020)",
+                                "colors": ["Green"],
+                                "set": "OP-12",
+                                "cardId": "OP12-020",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP12-020_9afESv6.jpg"
+                            },
+                            "result": "win",
+                            "turnOrder": "first",
+                            "format": "OP-13",
+                            "notes": "ggs",
+                            "date": "2025-11-26T05:02:36.847Z",
+                            "tournamentId": 1764133341015
+                        },
+                        {
+                            "id": 1764133486263,
+                            "myLeader": {
+                                "name": "Portgas.D.Ace (002)",
+                                "colors": ["Blue", "Red"],
+                                "set": "OP-13",
+                                "cardId": "OP13-002",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP13-002_sy67sYO.jpg"
+                            },
+                            "opponentLeader": {
+                                "name": "Monkey.D.Luffy (060)",
+                                "colors": ["Purple"],
+                                "set": "OP-05",
+                                "cardId": "OP05-060",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP05-060.jpg"
+                            },
+                            "result": "win",
+                            "turnOrder": "first",
+                            "format": "OP-13",
+                            "notes": "ggs",
+                            "date": "2025-11-26T05:04:46.263Z",
+                            "tournamentId": 1764133341015
+                        },
+                        {
+                            "id": 1764133565547,
+                            "myLeader": {
+                                "name": "Portgas.D.Ace (002)",
+                                "colors": ["Blue", "Red"],
+                                "set": "OP-13",
+                                "cardId": "OP13-002",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP13-002_sy67sYO.jpg"
+                            },
+                            "opponentLeader": {
+                                "name": "Arlong",
+                                "colors": ["Green", "Yellow"],
+                                "set": "OP-03",
+                                "cardId": "OP03-022",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP03-022.jpg"
+                            },
+                            "result": "win",
+                            "turnOrder": "second",
+                            "format": "OP-13",
+                            "notes": "",
+                            "date": "2025-11-26T05:06:05.547Z",
+                            "tournamentId": 1764133341015
+                        }
+                    ],
+                    "completed": true,
+                    "createdAt": "2025-11-26T05:02:21.015Z"
+                },
+                {
+                    "id": 1764134799847,
+                    "type": "Store Weekly",
+                    "date": "2025-11-26",
+                    "rounds": 3,
+                    "format": "OP-13",
+                    "location": "gay greeed",
+                    "matches": [
+                        {
+                            "id": 1764134812497,
+                            "myLeader": {
+                                "name": "Donquixote Doflamingo (019)",
+                                "colors": ["Green", "Purple"],
+                                "set": "OP-04",
+                                "cardId": "OP04-019",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP04-019.jpg"
+                            },
+                            "opponentLeader": {
+                                "name": "Arlong",
+                                "colors": ["Green", "Yellow"],
+                                "set": "OP-03",
+                                "cardId": "OP03-022",
+                                "image": "https://www.optcgapi.com/media/static/Card_Images/OP03-022.jpg"
+                            },
+                            "result": "win",
+                            "turnOrder": "second",
+                            "format": "OP-13",
+                            "notes": "googly",
+                            "date": "2025-11-26T05:26:52.497Z",
+                            "tournamentId": 1764134799847,
+                            "tournamentName": "Store Weekly"
+                        }
+                    ],
+                    "completed": false,
+                    "createdAt": "2025-11-26T05:26:39.847Z"
+                }
+            ];
+
+            localStorage.setItem('tournaments', JSON.stringify(tournaments));
+            document.getElementById('status').innerHTML = '<p style="color: green;">Data restored successfully! Close this page and refresh your app.</p>';
+        }
+    </script>
+</body>
+</html>

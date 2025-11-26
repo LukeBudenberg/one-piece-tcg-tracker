@@ -748,9 +748,13 @@
                     
                     <div class="form-group">
                         <label>Turn Order</label>
-                        <div class="button-group">
-                            <button type="button" class="choice-btn" onclick="selectTournamentTurnOrder('first')">1st</button>
-                            <button type="button" class="choice-btn" onclick="selectTournamentTurnOrder('second')">2nd</button>
+                        <div class="result-buttons">
+                            <button type="button" class="result-btn turn-btn" onclick="selectTournamentTurnOrder('first')">
+                                <span>1st</span>
+                            </button>
+                            <button type="button" class="result-btn turn-btn" onclick="selectTournamentTurnOrder('second')">
+                                <span>2nd</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -819,9 +823,13 @@
                     
                     <div class="form-group">
                         <label>Turn Order</label>
-                        <div class="button-group">
-                            <button type="button" class="choice-btn" id="editTournamentFirstBtn" onclick="editTournamentSelectTurnOrder('first')">1st</button>
-                            <button type="button" class="choice-btn" id="editTournamentSecondBtn" onclick="editTournamentSelectTurnOrder('second')">2nd</button>
+                        <div class="result-buttons">
+                            <button type="button" class="result-btn turn-btn" id="editTournamentFirstBtn" onclick="editTournamentSelectTurnOrder('first')">
+                                <span>1st</span>
+                            </button>
+                            <button type="button" class="result-btn turn-btn" id="editTournamentSecondBtn" onclick="editTournamentSelectTurnOrder('second')">
+                                <span>2nd</span>
+                            </button>
                         </div>
                     </div>
                     
@@ -844,6 +852,11 @@
                 <button class="modal-btn save-btn" onclick="saveEditTournamentMatch()">Save Changes</button>
             </div>
         </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="image-modal" onclick="closeImageModal()">
+        <img id="modalImage" src="" alt="Card Image">
     </div>
 
     <script src="script.js"></script>

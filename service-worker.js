@@ -1,4 +1,4 @@
-const CACHE_NAME = 'optcg-tracker-v1';
+const CACHE_NAME = 'optcg-tracker-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -20,6 +20,11 @@ self.addEventListener('install', event => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
+  // Skip caching for chrome-extension and other non-http(s) URLs
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -40,12 +45,20 @@ self.addEventListener('fetch', event => {
           // Clone the response
           const responseToCache = response.clone();
           
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
+          // Only cache http(s) requests
+          if (event.request.url.startsWith('http')) {
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(event.request, responseToCache).catch(err => {
+                  console.log('Cache put failed:', err);
+                });
+              });
+          }
           
           return response;
+        }).catch(error => {
+          // Return error response instead of throwing
+          return new Response('Network error', { status: 408 });
         });
       })
   );

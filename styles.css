@@ -49,6 +49,32 @@ body {
     background: rgba(242, 242, 247, 0.75);
 }
 
+.image-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.image-modal.active {
+    display: flex;
+}
+
+.image-modal img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+}
+
 .app-container {
     max-width: 800px;
     margin: 0 auto;
@@ -463,6 +489,20 @@ textarea:focus {
 }
 
 .result-btn.active.loss-btn {
+    background: var(--danger);
+    border-color: var(--danger);
+    color: white;
+}
+
+/* Tournament form button selected states */
+.result-btn.selected.win-btn,
+.result-btn.selected.turn-btn {
+    background: var(--success);
+    border-color: var(--success);
+    color: white;
+}
+
+.result-btn.selected.loss-btn {
     background: var(--danger);
     border-color: var(--danger);
     color: white;
