@@ -1767,10 +1767,11 @@ function saveUserName() {
 // Update title with user name
 function updateTitle() {
     const titleElement = document.getElementById('appTitle');
+    const logo = '<img src="icons/Straw-Hat-Logo.png" alt="Straw Hat" class="title-logo">';
     if (userName) {
-        titleElement.textContent = `⚓ ${userName}'s One Piece TCG Tracker`;
+        titleElement.innerHTML = `${logo} ${userName}'s One Piece TCG Tracker`;
     } else {
-        titleElement.textContent = '⚓ One Piece TCG Tracker';
+        titleElement.innerHTML = `${logo} One Piece TCG Tracker`;
     }
 }
 
@@ -1809,9 +1810,9 @@ function updateNamePreview() {
     const name = input.value.trim();
     
     if (name) {
-        preview.textContent = `⚓ ${name}'s One Piece TCG Tracker`;
+        preview.textContent = `${name}'s One Piece TCG Tracker`;
     } else {
-        preview.textContent = '⚓ One Piece TCG Tracker';
+        preview.textContent = 'One Piece TCG Tracker';
     }
 }
 
