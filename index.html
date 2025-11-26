@@ -757,6 +757,58 @@
         </div>
     </div>
 
+    <!-- Edit Tournament Match Modal -->
+    <div id="editTournamentMatchModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="editTournamentMatchTitle">✏️ Edit Tournament Match</h2>
+                <span class="modal-close" onclick="closeEditTournamentMatch()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editTournamentMatchForm">
+                    <div class="form-group">
+                        <label>Your Leader *</label>
+                        <select id="editTournamentMyLeader" required onchange="editTournamentSelectMyLeader()">
+                            <option value="">Select your leader...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Opponent's Leader *</label>
+                        <select id="editTournamentOpponentLeader" required onchange="editTournamentSelectOpponentLeader()">
+                            <option value="">Select opponent's leader...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Turn Order</label>
+                        <div class="button-group">
+                            <button type="button" class="choice-btn" id="editTournamentFirstBtn" onclick="editTournamentSelectTurnOrder('first')">🥇 Went First</button>
+                            <button type="button" class="choice-btn" id="editTournamentSecondBtn" onclick="editTournamentSelectTurnOrder('second')">🥈 Went Second</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Result *</label>
+                        <div class="result-buttons">
+                            <button type="button" class="result-btn win-btn" id="editTournamentWinBtn" onclick="editTournamentSelectResult('win')">✓ Win</button>
+                            <button type="button" class="result-btn loss-btn" id="editTournamentLossBtn" onclick="editTournamentSelectResult('loss')">✗ Loss</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editTournamentMatchNotes">Notes</label>
+                        <textarea id="editTournamentMatchNotes" maxlength="500" placeholder="Add any notes about this match..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel-btn" onclick="closeEditTournamentMatch()">Cancel</button>
+                <button class="modal-btn save-btn" onclick="saveEditTournamentMatch()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

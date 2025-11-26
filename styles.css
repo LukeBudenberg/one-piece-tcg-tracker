@@ -694,6 +694,28 @@ textarea:focus {
     transform: scale(1.1);
 }
 
+.match-edit-btn {
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    line-height: 1;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+}
+
+.match-edit-btn:hover {
+    background: rgba(0, 122, 255, 0.1);
+    transform: scale(1.1);
+}
+
 .match-leaders-container {
     display: flex;
     align-items: center;

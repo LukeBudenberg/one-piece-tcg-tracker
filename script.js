@@ -143,6 +143,12 @@ let tournamentSelectedMyLeader = null;
 let tournamentSelectedOpponentLeader = null;
 let tournamentSelectedResult = null;
 let tournamentSelectedTurnOrder = null;
+let editingTournamentId = null;
+let editingMatchIndex = null;
+let editTournamentSelectedMyLeader = null;
+let editTournamentSelectedOpponentLeader = null;
+let editTournamentSelectedResult = null;
+let editTournamentSelectedTurnOrder = null;
 
 // Initialize app
 async function init() {
@@ -2378,6 +2384,7 @@ function openTournamentDetail(tournamentId) {
                                     <div class="match-result ${match.result}">
                                         ${match.result === 'win' ? 'WIN' : 'LOSS'}
                                     </div>
+                                    <button class="match-edit-btn" onclick="event.stopPropagation(); editTournamentMatch(${tournament.id}, ${index})" title="Edit match">✏️</button>
                                 </div>
                             </div>
                         `;
@@ -2425,6 +2432,156 @@ function clearAllTournaments() {
     saveTournaments();
     updateTournamentsList();
     updateUI(); // Update main UI in case tournament matches affected stats
+}
+
+// Edit tournament match
+function editTournamentMatch(tournamentId, matchIndex) {
+    const tournament = tournaments.find(t => t.id === tournamentId);
+    if (!tournament || !tournament.matches[matchIndex]) return;
+    
+    editingTournamentId = tournamentId;
+    editingMatchIndex = matchIndex;
+    const match = tournament.matches[matchIndex];
+    
+    const modal = document.getElementById('editTournamentMatchModal');
+    const title = document.getElementById('editTournamentMatchTitle');
+    
+    title.textContent = `✏️ Edit Round ${matchIndex + 1} - ${tournament.type || tournament.name}`;
+    
+    // Populate leader selects
+    const myLeaderSelect = document.getElementById('editTournamentMyLeader');
+    const opponentLeaderSelect = document.getElementById('editTournamentOpponentLeader');
+    
+    myLeaderSelect.innerHTML = '<option value="">Select your leader...</option>';
+    opponentLeaderSelect.innerHTML = '<option value="">Select opponent\'s leader...</option>';
+    
+    allLeaders.forEach((leader, index) => {
+        const displayName = getLeaderDisplayName(leader);
+        myLeaderSelect.innerHTML += `<option value="${index}">${displayName}</option>`;
+        opponentLeaderSelect.innerHTML += `<option value="${index}">${displayName}</option>`;
+    });
+    
+    // Pre-select current values
+    const myLeaderIndex = allLeaders.findIndex(leader => getLeaderKey(leader) === getLeaderKey(match.myLeader));
+    const oppLeaderIndex = allLeaders.findIndex(leader => getLeaderKey(leader) === getLeaderKey(match.opponentLeader));
+    
+    if (myLeaderIndex !== -1) {
+        myLeaderSelect.value = myLeaderIndex;
+        editTournamentSelectedMyLeader = allLeaders[myLeaderIndex];
+    }
+    
+    if (oppLeaderIndex !== -1) {
+        opponentLeaderSelect.value = oppLeaderIndex;
+        editTournamentSelectedOpponentLeader = allLeaders[oppLeaderIndex];
+    }
+    
+    // Set result
+    editTournamentSelectedResult = match.result;
+    document.querySelectorAll('#editTournamentMatchModal .result-btn').forEach(btn => btn.classList.remove('selected'));
+    if (match.result === 'win') {
+        document.getElementById('editTournamentWinBtn').classList.add('selected');
+    } else {
+        document.getElementById('editTournamentLossBtn').classList.add('selected');
+    }
+    
+    // Set turn order
+    editTournamentSelectedTurnOrder = match.turnOrder;
+    document.querySelectorAll('#editTournamentMatchModal .choice-btn').forEach(btn => btn.classList.remove('selected'));
+    if (match.turnOrder === 'first') {
+        document.getElementById('editTournamentFirstBtn').classList.add('selected');
+    } else if (match.turnOrder === 'second') {
+        document.getElementById('editTournamentSecondBtn').classList.add('selected');
+    }
+    
+    // Set notes
+    document.getElementById('editTournamentMatchNotes').value = match.notes || '';
+    
+    modal.style.display = 'block';
+}
+
+// Close edit tournament match modal
+function closeEditTournamentMatch() {
+    const modal = document.getElementById('editTournamentMatchModal');
+    modal.style.display = 'none';
+    editingTournamentId = null;
+    editingMatchIndex = null;
+    editTournamentSelectedMyLeader = null;
+    editTournamentSelectedOpponentLeader = null;
+    editTournamentSelectedResult = null;
+    editTournamentSelectedTurnOrder = null;
+}
+
+// Select functions for edit modal
+function editTournamentSelectMyLeader() {
+    const select = document.getElementById('editTournamentMyLeader');
+    const index = parseInt(select.value);
+    if (!isNaN(index)) {
+        editTournamentSelectedMyLeader = allLeaders[index];
+    }
+}
+
+function editTournamentSelectOpponentLeader() {
+    const select = document.getElementById('editTournamentOpponentLeader');
+    const index = parseInt(select.value);
+    if (!isNaN(index)) {
+        editTournamentSelectedOpponentLeader = allLeaders[index];
+    }
+}
+
+function editTournamentSelectTurnOrder(order) {
+    editTournamentSelectedTurnOrder = order;
+    document.querySelectorAll('#editTournamentMatchModal .choice-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+}
+
+function editTournamentSelectResult(result) {
+    editTournamentSelectedResult = result;
+    document.querySelectorAll('#editTournamentMatchModal .result-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    event.target.classList.add('selected');
+}
+
+// Save edited tournament match
+function saveEditTournamentMatch() {
+    const tournament = tournaments.find(t => t.id === editingTournamentId);
+    if (!tournament || editingMatchIndex === null) return;
+    
+    const notes = document.getElementById('editTournamentMatchNotes').value.trim();
+    
+    if (!editTournamentSelectedMyLeader || !editTournamentSelectedOpponentLeader || !editTournamentSelectedResult) {
+        alert('Please select your leader, opponent\'s leader, and match result');
+        return;
+    }
+    
+    // Update the match
+    const match = tournament.matches[editingMatchIndex];
+    match.myLeader = editTournamentSelectedMyLeader;
+    match.opponentLeader = editTournamentSelectedOpponentLeader;
+    match.result = editTournamentSelectedResult;
+    match.turnOrder = editTournamentSelectedTurnOrder;
+    match.notes = notes;
+    
+    // Also update in global matches array if it exists there
+    const globalMatch = matches.find(m => m.id === match.id);
+    if (globalMatch) {
+        globalMatch.myLeader = editTournamentSelectedMyLeader;
+        globalMatch.opponentLeader = editTournamentSelectedOpponentLeader;
+        globalMatch.result = editTournamentSelectedResult;
+        globalMatch.turnOrder = editTournamentSelectedTurnOrder;
+        globalMatch.notes = notes;
+        saveMatches();
+    }
+    
+    saveTournaments();
+    updateTournamentsList();
+    updateUI();
+    
+    // Refresh the detail view
+    openTournamentDetail(editingTournamentId);
+    closeEditTournamentMatch();
 }
 
 // Initialize app when DOM is ready
