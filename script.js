@@ -1888,13 +1888,16 @@ function closeCreateTournament() {
 
 // Save tournament and start recording matches
 function saveTournament() {
+    console.log('saveTournament called');
     const type = document.getElementById('tournamentType').value;
     const date = document.getElementById('tournamentDate').value;
     const rounds = parseInt(document.getElementById('tournamentRounds').value);
     const format = document.getElementById('tournamentFormat').value;
     const location = document.getElementById('tournamentLocation').value.trim();
     
-    if (!type || !date || !rounds) {
+    console.log('Form values:', { type, date, rounds, format, location });
+    
+    if (!type || !date || !rounds || isNaN(rounds)) {
         alert('Please fill in required fields (Tournament Type, Date, and Rounds)');
         return;
     }
@@ -1911,6 +1914,8 @@ function saveTournament() {
         createdAt: new Date().toISOString()
     };
     
+    console.log('Tournament created:', tournament);
+    
     tournaments.push(tournament);
     saveTournaments();
     updateTournamentsList();
@@ -1918,6 +1923,7 @@ function saveTournament() {
     
     // Open match recording interface
     currentTournamentId = tournament.id;
+    console.log('Opening match recording for tournament:', currentTournamentId);
     openTournamentMatchRecording();
 }
 
