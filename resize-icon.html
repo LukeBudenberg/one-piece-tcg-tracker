@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Resize Icon to All Sizes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+        }
+        .preview {
+            margin: 20px 0;
+            text-align: center;
+        }
+        .preview img {
+            max-width: 300px;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e8f4f8;
+            border-radius: 8px;
+            display: none;
+        }
+        canvas {
+            display: none;
+        }
+        .progress {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Resize Straw Hat Logo for PWA Icons</h1>
+        
+        <div class="preview">
+            <h3>Current Logo:</h3>
+            <img id="preview" src="icons/Straw-Hat-Logo.png" alt="Straw Hat Logo">
+        </div>
+
+        <button onclick="generateAllIcons()">Generate All Icon Sizes</button>
+        
+        <div id="status" class="status">
+            <h3>Progress:</h3>
+            <div id="progress"></div>
+        </div>
+
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        async function generateAllIcons() {
+            const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+            const statusDiv = document.getElementById('status');
+            const progressDiv = document.getElementById('progress');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            statusDiv.style.display = 'block';
+            progressDiv.innerHTML = 'Loading image...';
+            
+            // Load the image
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            
+            img.onload = function() {
+                progressDiv.innerHTML = 'Image loaded! Generating icons...<br>';
+                
+                sizes.forEach((size, index) => {
+                    setTimeout(() => {
+                        canvas.width = size;
+                        canvas.height = size;
+                        
+                        // Fill with white background
+                        ctx.fillStyle = 'white';
+                        ctx.fillRect(0, 0, size, size);
+                        
+                        // Draw image centered and scaled to fit
+                        const scale = Math.min(size / img.width, size / img.height);
+                        const x = (size - img.width * scale) / 2;
+                        const y = (size - img.height * scale) / 2;
+                        
+                        ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+                        
+                        // Download
+                        const link = document.createElement('a');
+                        link.download = `icon-${size}x${size}.png`;
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        
+                        progressDiv.innerHTML += `✓ Generated ${size}x${size}<br>`;
+                        
+                        if (index === sizes.length - 1) {
+                            progressDiv.innerHTML += '<br><strong>✅ All icons generated!</strong><br>Please move them to the icons/ folder (replace existing files).';
+                        }
+                    }, index * 200); // Delay between downloads
+                });
+            };
+            
+            img.onerror = function() {
+                progressDiv.innerHTML = '❌ Error loading image. Make sure Straw-Hat-Logo.png is in the icons folder.';
+            };
+            
+            img.src = 'icons/Straw-Hat-Logo.png';
+        }
+    </script>
+</body>
+</html>
