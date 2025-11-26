@@ -2100,11 +2100,16 @@ function saveTournamentMatch() {
 // Update tournaments list
 function updateTournamentsList() {
     const container = document.getElementById('tournamentsList');
+    const clearAllBtn = document.querySelector('#tournamentsSection .clear-all-btn');
     
     if (tournaments.length === 0) {
         container.innerHTML = '<p class="empty-state">No tournaments recorded yet. Create one to start tracking!</p>';
+        if (clearAllBtn) clearAllBtn.style.display = 'none';
         return;
     }
+    
+    // Show clear all button when there are tournaments
+    if (clearAllBtn) clearAllBtn.style.display = 'block';
     
     // Sort by date (newest first)
     const sortedTournaments = [...tournaments].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -2369,6 +2374,23 @@ function deleteTournament() {
     saveTournaments();
     updateTournamentsList();
     closeTournamentDetail();
+}
+
+// Clear all tournaments
+function clearAllTournaments() {
+    if (tournaments.length === 0) return;
+    
+    const confirmMessage = `Are you sure you want to delete ALL ${tournaments.length} tournament${tournaments.length > 1 ? 's' : ''}?\n\nThis action cannot be undone.\nAll tournament matches will remain in your match history.`;
+    
+    if (!confirm(confirmMessage)) return;
+    
+    // Double confirmation for safety
+    if (!confirm('This will permanently delete all tournaments. Are you absolutely sure?')) return;
+    
+    tournaments = [];
+    saveTournaments();
+    updateTournamentsList();
+    updateUI(); // Update main UI in case tournament matches affected stats
 }
 
 // Initialize app when DOM is ready
