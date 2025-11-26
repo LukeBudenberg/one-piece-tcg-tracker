@@ -1,10 +1,11 @@
-const CACHE_NAME = 'optcg-tracker-v2';
+const CACHE_NAME = 'optcg-tracker-v3';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/script.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './styles.css',
+  './script.js',
+  './manifest.json',
+  './icons/Straw-Hat-Logo.png'
 ];
 
 // Install event - cache files
